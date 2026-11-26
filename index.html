@@ -53,6 +53,8 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   font: 12px var(--font); cursor: pointer; border-radius: 2px;
 }
 .btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn-reset { background: #fff8e1; border-color: #c9a227; font-weight: 700; }
+.btn-reset:hover { border-color: #8a6d1a; color: #6b5300; }
 
 .hint, .banner { margin: 8px 0 0; padding: 6px 8px; font-size: 11px; border: 1px solid #e0c36a; background: #fff8e1; color: #6b5300; }
 .hint { display: none; }
@@ -195,6 +197,7 @@ tr.hidden { display: none; }
       <div class="actions">
         <button type="button" class="btn" id="expandAll">Раскрыть все</button>
         <button type="button" class="btn" id="collapseAll">Свернуть все</button>
+        <button type="button" class="btn btn-reset" id="resetFilters">Сбросить все фильтры</button>
       </div>
     </div>
 
@@ -318,6 +321,7 @@ const el = {
   weeks: document.getElementById('weeks'),
   expandAll: document.getElementById('expandAll'),
   collapseAll: document.getElementById('collapseAll'),
+  resetFilters: document.getElementById('resetFilters'),
 };
 
 function fillSelect(node, values, selected) {
@@ -666,6 +670,24 @@ function expandAll(open) {
   render();
 }
 
+function resetFilters() {
+  if (!DATA) return;
+  const from = DATA.meta.period.from;
+  const to = DATA.meta.period.to;
+  el.scale.value = 'Месяц';
+  el.utmSource.value = '(все)';
+  el.utmMedium.value = '(все)';
+  el.utmCampaign.value = '(все)';
+  el.utmContent.value = '(все)';
+  el.entry.value = '(все)';
+  el.channel.value = '(все)';
+  el.campaignType.value = '(все)';
+  el.weeks.value = '';
+  expanded.clear();
+  initDateRange(from, to);
+  render();
+}
+
 function applyDateSelection(selectedDates) {
   if (!selectedDates || selectedDates.length < 2) return false;
   el.dateFrom.value = flatpickr.formatDate(selectedDates[0], 'Y-m-d');
@@ -736,6 +758,7 @@ async function boot() {
   bindFilters();
   el.expandAll.addEventListener('click', () => expandAll(true));
   el.collapseAll.addEventListener('click', () => expandAll(false));
+  el.resetFilters.addEventListener('click', resetFilters);
 
   render();
 }
