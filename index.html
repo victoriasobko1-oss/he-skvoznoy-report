@@ -8,130 +8,265 @@
 :root {
   --traffic: #fce5cd;
   --micro: #e2ecfd;
-  --border: #c7c7c7;
-  --bg: #ececec;
-  --panel: #fff;
-  --accent: #1a73e8;
-  --warn: #fff2cc;
-  --muted: #666;
+  --total: #c5cadc;
+  --channel: #e8eaf2;
+  --gutter: #f2f2f2;
+  --border: #bdbdbd;
+  --filter: #fff2cc;
+  --warn-bg: #fff8e1;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--bg); color: #222; font: 13px/1.4 "Segoe UI", Arial, sans-serif; }
-.top { position: sticky; top: 0; z-index: 20; background: var(--panel); border-bottom: 1px solid #ccc; padding: 12px 16px 10px; }
-.top h1 { margin: 0 0 4px; font-size: 18px; }
-.meta { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+html, body { margin: 0; height: 100%; background: #d9d9d9; color: #222;
+  font: 11px/1.25 Arial, Helvetica, sans-serif; }
+.layout { display: flex; flex-direction: column; height: 100vh; }
+
+/* —— top bar —— */
+.topbar { flex: 0 0 auto; background: #fff; border-bottom: 1px solid #aaa; }
+.topbar-inner { padding: 8px 12px 6px; }
+.topbar h1 { margin: 0; font-size: 15px; font-weight: 700; }
+.meta { color: #555; font-size: 10px; margin: 2px 0 8px; line-height: 1.35; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px;
+  border: 1px solid #ccc; background: #fff; font-size: 10px; }
+.sw { width: 11px; height: 11px; border: 1px solid #999; display: inline-block; }
+
+/* filters like Excel yellow cells */
 .filters {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 8px 12px;
-  align-items: end;
-  padding: 10px 12px;
+  grid-template-columns: repeat(10, minmax(110px, 1fr));
+  gap: 4px 8px;
+  padding: 8px 10px;
   background: #f7f7f7;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ccc;
 }
-.filters label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: #444; font-weight: 600; }
+.filters label { display: flex; flex-direction: column; gap: 2px; font-size: 9px;
+  font-weight: 700; color: #444; text-transform: none; }
 .filters input, .filters select {
-  font: inherit; padding: 6px 8px; border: 1px solid #bbb; border-radius: 6px; background: #fff; min-height: 34px;
+  font: 11px Arial, sans-serif; padding: 3px 5px; min-height: 26px;
+  border: 1px solid #888; background: var(--filter); border-radius: 0;
 }
-.filters .span2 { grid-column: span 2; }
-.dates { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.hint { margin: 8px 0 0; font-size: 11px; color: #7a5a00; background: var(--warn); border: 1px solid #e0c36a; padding: 6px 10px; border-radius: 6px; }
-.wrap { padding: 12px 16px 40px; overflow: auto; }
-table.report { border-collapse: collapse; width: max-content; min-width: 100%; background: #fff; font-size: 12px; }
-table.report th, table.report td { border: 1px solid var(--border); padding: 4px 8px; white-space: nowrap; }
-table.report th { position: sticky; top: 0; background: var(--traffic); z-index: 5; font-weight: 600; }
-table.report th.micro { background: var(--micro); }
-table.report td.num { text-align: right; font-variant-numeric: tabular-nums; }
-table.report td.channel { font-weight: 700; background: #f5f5f5; }
-table.report td.month { padding-left: 28px; color: #333; }
-table.report tr.grand td { background: #c5cadc; font-weight: 700; }
-table.report tr.total td { background: #e8eaf2; font-weight: 700; }
-.empty { color: #bbb; }
-.banner { font-size: 11px; color: #555; margin: 0 0 8px; }
-.status { font-size: 11px; color: var(--muted); }
+.filters .dates { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.filters .wide { grid-column: span 2; }
+.hint { margin: 0; padding: 5px 12px; font-size: 10px; background: var(--warn-bg);
+  border-bottom: 1px solid #e0c36a; color: #6b5300; display: none; }
+.banner { margin: 0; padding: 5px 12px; font-size: 10px; background: #fff8e1;
+  border-bottom: 1px solid #e0c36a; color: #555; }
+
+/* —— sheet —— */
+.sheet-wrap { flex: 1 1 auto; overflow: auto; background: #fff; }
+table.sheet { border-collapse: collapse; min-width: 100%; background: #fff; table-layout: fixed; }
+table.sheet th, table.sheet td {
+  border: 1px solid var(--border);
+  padding: 2px 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 20px;
+  vertical-align: middle;
+}
+/* sticky multi-row header */
+table.sheet thead th {
+  position: sticky; z-index: 8; font-weight: 600; text-align: center;
+  box-shadow: inset 0 -1px 0 var(--border);
+}
+table.sheet thead tr:nth-child(1) th { top: 0; }
+table.sheet thead tr:nth-child(2) th { top: 22px; }
+table.sheet thead tr:nth-child(3) th { top: 44px; font-weight: 400; font-size: 9px; color: #555; }
+
+.col-gutter { width: 22px; min-width: 22px; max-width: 22px; background: var(--gutter) !important; }
+.col-label { width: 240px; min-width: 240px; text-align: left !important; }
+.col-metric { width: 88px; min-width: 72px; }
+
+.th-group-traffic, .td-traffic { background: var(--traffic) !important; }
+.th-group-micro, .td-micro { background: var(--micro) !important; }
+.th-metric-traffic { background: var(--traffic) !important; }
+.th-metric-micro { background: var(--micro) !important; }
+.th-src { background: #fafafa !important; }
+
+/* sticky first two columns */
+th.sticky, td.sticky {
+  position: sticky; left: 0; z-index: 6; background: #fff;
+}
+th.sticky-label, td.sticky-label {
+  position: sticky; left: 22px; z-index: 7; background: #fff;
+  text-align: left !important; white-space: normal; line-height: 1.2;
+}
+thead th.sticky, thead th.sticky-label { z-index: 12; background: var(--gutter); }
+thead th.sticky-label { background: #f2f2f2; }
+
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.empty { color: #bbb; text-align: right; }
+
+/* hierarchy */
+tr.grand td { background: var(--total) !important; font-weight: 700; }
+tr.grand td.sticky-label { font-weight: 700; }
+tr.total td.sticky-label { font-weight: 700; background: var(--channel) !important; }
+tr.total td.sticky { background: var(--channel) !important; }
+tr.total td.td-traffic { background: #f8d9a8 !important; }
+tr.total td.td-micro { background: #c9d8f7 !important; }
+tr.month td.sticky-label { padding-left: 22px; font-weight: 400; color: #333; }
+tr.spacer td { height: 10px; border-left: none; border-right: none; background: #fff !important;
+  border-top-color: transparent; border-bottom-color: #ddd; }
+
+tr:hover:not(.spacer) td { outline: 1px solid #1a73e8; outline-offset: -1px; }
+.status { padding: 4px 12px; font-size: 10px; color: #666; background: #f3f3f3;
+  border-top: 1px solid #ccc; flex: 0 0 auto; }
+
+.title-row td { background: #f2f2f2 !important; font-size: 12px; font-weight: 700;
+  height: 26px; text-align: left !important; }
 </style>
 </head>
 <body>
-<div class="top">
-  <h1 id="title">Сквозная отчетность | Магистратура</h1>
-  <div class="meta" id="meta"></div>
-  <div class="filters" id="filters">
-    <label class="span2">Диапазон дат
-      <div class="dates">
-        <input type="date" id="dateFrom"/>
-        <input type="date" id="dateTo"/>
+<div class="layout">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <h1 id="title">Прототип сквозной отчетности | Магистратура</h1>
+      <div class="meta" id="meta"></div>
+      <div class="legend">
+        <span><i class="sw" style="background:#fce5cd"></i>Трафик</span>
+        <span><i class="sw" style="background:#e2ecfd"></i>Микроконверсии</span>
+        <span><i class="sw" style="background:#c5cadc"></i>Итого</span>
+        <span><i class="sw" style="background:#fff2cc"></i>Селекторы</span>
       </div>
-    </label>
-    <label>Масштаб дат
-      <select id="scale"></select>
-    </label>
-    <label>UTM Source
-      <select id="utmSource"></select>
-    </label>
-    <label>UTM Medium
-      <select id="utmMedium"></select>
-    </label>
-    <label>UTM Campaign
-      <select id="utmCampaign"></select>
-    </label>
-    <label>UTM Content
-      <select id="utmContent"></select>
-    </label>
-    <label>Точка входа
-      <select id="entry"></select>
-    </label>
-    <label>Канал (макро)
-      <select id="channel"></select>
-    </label>
-    <label>Тип кампаний
-      <select id="campaignType"></select>
-    </label>
-    <label>Количество недель
-      <input type="number" id="weeks" min="1" max="52" placeholder="пусто = выкл"/>
-    </label>
+    </div>
+    <div class="filters">
+      <label class="wide">Диапазон дат (от / до)
+        <div class="dates">
+          <input type="date" id="dateFrom"/>
+          <input type="date" id="dateTo"/>
+        </div>
+      </label>
+      <label>Масштаб дат
+        <select id="scale"></select>
+      </label>
+      <label>UTM Source
+        <select id="utmSource"></select>
+      </label>
+      <label>UTM Medium
+        <select id="utmMedium"></select>
+      </label>
+      <label>UTM Campaign
+        <select id="utmCampaign"></select>
+      </label>
+      <label>UTM Content
+        <select id="utmContent"></select>
+      </label>
+      <label>Точка входа
+        <select id="entry"></select>
+      </label>
+      <label>Канал (макро)
+        <select id="channel"></select>
+      </label>
+      <label>Тип кампаний
+        <select id="campaignType"></select>
+      </label>
+      <label>Кол-во недель
+        <input type="number" id="weeks" min="1" max="52" placeholder="выкл"/>
+      </label>
+    </div>
+    <p class="hint" id="hint"></p>
+    <p class="banner" id="banner"></p>
   </div>
-  <p class="hint" id="hint"></p>
-</div>
 
-<div class="wrap">
-  <p class="banner" id="banner"></p>
-  <p class="status" id="status"></p>
-  <table class="report" id="table">
-    <thead>
-      <tr>
-        <th>Канал / период</th>
-        <th>Расходы</th>
-        <th>Показы</th>
-        <th>Клики</th>
-        <th>Визиты</th>
-        <th>Посетители</th>
-        <th>CTR</th>
-        <th>CPC</th>
-        <th>CPU</th>
-        <th class="micro">CR форма</th>
-        <th class="micro">Форма</th>
-        <th class="micro">Телефон</th>
-        <th class="micro">Уч. план</th>
-        <th class="micro">Бот</th>
-        <th class="micro">Подписка</th>
-        <th class="micro">CPA</th>
-        <th class="micro">Отказы</th>
-        <th class="micro">Глубина</th>
-        <th class="micro">Время</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
+  <div class="sheet-wrap">
+    <table class="sheet" id="table">
+      <colgroup>
+        <col class="col-gutter"/>
+        <col class="col-label"/>
+        <col class="col-metric"/><col class="col-metric"/><col class="col-metric"/>
+        <col class="col-metric"/><col class="col-metric"/><col class="col-metric"/>
+        <col class="col-metric"/><col class="col-metric"/>
+        <col class="col-metric"/><col class="col-metric"/><col class="col-metric"/>
+        <col class="col-metric"/><col class="col-metric"/><col class="col-metric"/>
+        <col class="col-metric"/><col class="col-metric"/><col class="col-metric"/>
+        <col class="col-metric"/>
+      </colgroup>
+      <thead>
+        <tr>
+          <th class="sticky col-gutter" rowspan="3"></th>
+          <th class="sticky-label" rowspan="3">Канал / период</th>
+          <th class="th-group-traffic" colspan="8">Трафик</th>
+          <th class="th-group-micro" colspan="10">Микроконверсии</th>
+        </tr>
+        <tr>
+          <th class="th-metric-traffic">Расходы</th>
+          <th class="th-metric-traffic">Показы</th>
+          <th class="th-metric-traffic">Клики</th>
+          <th class="th-metric-traffic">Визиты</th>
+          <th class="th-metric-traffic">Посетители кросс-девайс</th>
+          <th class="th-metric-traffic">CTR</th>
+          <th class="th-metric-traffic">CPC</th>
+          <th class="th-metric-traffic">CPU</th>
+          <th class="th-metric-micro">CR: визит → форма</th>
+          <th class="th-metric-micro">Отправка Яндекс Формы</th>
+          <th class="th-metric-micro">Клики по телефону</th>
+          <th class="th-metric-micro">Смотрели уч. план</th>
+          <th class="th-metric-micro">Перешли в бот</th>
+          <th class="th-metric-micro">Подписались на канал</th>
+          <th class="th-metric-micro">CPA</th>
+          <th class="th-metric-micro">Отказы</th>
+          <th class="th-metric-micro">Глубина</th>
+          <th class="th-metric-micro">Время на сайте</th>
+        </tr>
+        <tr>
+          <th class="th-src">Директ / площадки</th>
+          <th class="th-src">Директ / площадки</th>
+          <th class="th-src">Яндекс Директ</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">мера</th>
+          <th class="th-src">мера</th>
+          <th class="th-src">мера</th>
+          <th class="th-src">мера</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">мера</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <div class="status" id="status"></div>
 </div>
 
 <script>
-const METRIC_KEYS = ['spend','impressions','clicks','visits','users','ctr','cpc','cpu','cr_form','form','phone','plan','bot','sub','cpa','bounce','depth','time'];
+const COLS = [
+  { key: 'spend', kind: 'money', band: 'traffic' },
+  { key: 'impressions', kind: 'int', band: 'traffic' },
+  { key: 'clicks', kind: 'int', band: 'traffic' },
+  { key: 'visits', kind: 'int', band: 'traffic' },
+  { key: 'users', kind: 'int', band: 'traffic' },
+  { key: 'ctr', kind: 'pct', band: 'traffic' },
+  { key: 'cpc', kind: 'money', band: 'traffic' },
+  { key: 'cpu', kind: 'money', band: 'traffic' },
+  { key: 'cr_form', kind: 'pct', band: 'micro' },
+  { key: 'form', kind: 'int', band: 'micro' },
+  { key: 'phone', kind: 'int', band: 'micro' },
+  { key: 'plan', kind: 'int', band: 'micro' },
+  { key: 'bot', kind: 'int', band: 'micro' },
+  { key: 'sub', kind: 'int', band: 'micro' },
+  { key: 'cpa', kind: 'money', band: 'micro' },
+  { key: 'bounce', kind: 'pct', band: 'micro' },
+  { key: 'depth', kind: 'float', band: 'micro' },
+  { key: 'time', kind: 'float', band: 'micro' },
+];
+
 const fmt = {
-  int: v => v == null || v === '' ? '—' : Number(v).toLocaleString('ru-RU'),
-  pct: v => v == null || v === '' ? '—' : (Number(v) * (Number(v) > 1 ? 1 : 100)).toFixed(2).replace('.', ',') + '%',
-  money: v => v == null || v === '' ? '—' : Number(v).toLocaleString('ru-RU') + ' ₽',
-  num: v => v == null || v === '' ? '—' : Number(v).toLocaleString('ru-RU', {maximumFractionDigits: 2}),
+  int: v => Number(v).toLocaleString('ru-RU'),
+  pct: v => {
+    const n = Number(v);
+    const p = n > 1 ? n : n * 100;
+    return p.toFixed(2).replace('.', ',') + '%';
+  },
+  money: v => Number(v).toLocaleString('ru-RU') + ' ₽',
+  float: v => Number(v).toLocaleString('ru-RU', { maximumFractionDigits: 2 }),
 };
 
 let DATA = null;
@@ -189,23 +324,34 @@ function filterRows(rows, f) {
       if (weekCut && rt < weekCut) return false;
       return true;
     }
-
-    // totals / grand: only when date range is full snapshot period
     if ((r.row_kind === 'total' || r.row_kind === 'grand') && !fullRange) return false;
     if (weeksOn && (r.row_kind === 'total' || r.row_kind === 'grand')) return false;
     return true;
-  }).sort((a,b) => a.sort - b.sort);
+  }).sort((a, b) => a.sort - b.sort);
 }
 
-function cell(v, kind) {
+function cell(v, kind, band) {
   const td = document.createElement('td');
-  td.className = 'num';
-  if (v == null) { td.classList.add('empty'); td.textContent = '—'; return td; }
-  if (kind === 'pct') td.textContent = fmt.pct(v);
-  else if (kind === 'money') td.textContent = fmt.money(v);
-  else if (kind === 'float') td.textContent = fmt.num(v);
-  else td.textContent = fmt.int(v);
+  td.className = 'num td-' + band;
+  if (v == null || v === '') {
+    td.classList.add('empty');
+    td.textContent = '';
+    return td;
+  }
+  td.textContent = fmt[kind](v);
   return td;
+}
+
+function spacerRow() {
+  const tr = document.createElement('tr');
+  tr.className = 'spacer';
+  for (let i = 0; i < 20; i++) {
+    const td = document.createElement('td');
+    if (i === 0) td.className = 'sticky col-gutter';
+    if (i === 1) td.className = 'sticky-label';
+    tr.appendChild(td);
+  }
+  return tr;
 }
 
 function render() {
@@ -224,20 +370,30 @@ function render() {
   };
 
   const hints = [];
-  if (f.scale !== 'Месяц') hints.push('Масштаб «' + f.scale + '»: в текущем data.json только месячное зерно — показаны месяцы.');
+  if (f.scale !== 'Месяц') hints.push('Масштаб «' + f.scale + '»: в data.json пока только месяцы.');
   if ([f.utmSource, f.utmMedium, f.utmCampaign, f.utmContent].some(x => x !== '(все)')) {
-    hints.push('UTM-фильтры пока не режут: в витрине нет UTM-разреза (после выгрузки появятся в словаре и в строках).');
+    hints.push('UTM пока не режет витрину — нет UTM-зерна.');
   }
-  if (f.entry !== '(все)') hints.push('Точка входа: справочник есть, к цифрам Метрики ещё не пришита (нужна склейка с amo).');
+  if (f.entry !== '(все)') hints.push('Точка входа: справочник есть, к Метрике ещё не пришита.');
   hint.textContent = hints.join(' ');
   hint.style.display = hints.length ? 'block' : 'none';
 
   const filtered = filterRows(DATA.rows, f);
   tbody.innerHTML = '';
+
+  // title row inside sheet
+  const titleTr = document.createElement('tr');
+  titleTr.className = 'title-row';
+  const g = document.createElement('td'); g.className = 'sticky col-gutter';
+  const t = document.createElement('td'); t.className = 'sticky-label'; t.colSpan = 19;
+  t.textContent = 'Канал / кампания → период | high-education';
+  titleTr.appendChild(g); titleTr.appendChild(t);
+  tbody.appendChild(titleTr);
+
   if (!filtered.length) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
-    td.colSpan = 19;
+    td.colSpan = 20;
     td.textContent = 'Нет строк под выбранные фильтры';
     tr.appendChild(td);
     tbody.appendChild(tr);
@@ -245,39 +401,32 @@ function render() {
     return;
   }
 
+  let prevChannel = null;
   filtered.forEach(r => {
+    if (prevChannel != null && r.channel_key !== prevChannel && (r.row_kind === 'total' || r.row_kind === 'grand')) {
+      tbody.appendChild(spacerRow());
+    }
+    prevChannel = r.channel_key;
+
     const tr = document.createElement('tr');
-    if (r.row_kind === 'grand') tr.className = 'grand';
-    else if (r.row_kind === 'total') tr.className = 'total';
+    tr.className = r.row_kind === 'grand' ? 'grand' : (r.row_kind === 'total' ? 'total' : 'month');
+
+    const gutter = document.createElement('td');
+    gutter.className = 'sticky col-gutter';
+    tr.appendChild(gutter);
 
     const label = document.createElement('td');
-    if (r.row_kind === 'month') label.className = 'month';
-    else label.className = 'channel';
+    label.className = 'sticky-label';
     label.textContent = r.label;
+    if (r.row_kind === 'total' || r.row_kind === 'grand') label.title = r.label;
     tr.appendChild(label);
 
-    tr.appendChild(cell(r.spend, 'money'));
-    tr.appendChild(cell(r.impressions, 'int'));
-    tr.appendChild(cell(r.clicks, 'int'));
-    tr.appendChild(cell(r.visits, 'int'));
-    tr.appendChild(cell(r.users, 'int'));
-    tr.appendChild(cell(r.ctr, 'pct'));
-    tr.appendChild(cell(r.cpc, 'money'));
-    tr.appendChild(cell(r.cpu, 'money'));
-    tr.appendChild(cell(r.cr_form, 'pct'));
-    tr.appendChild(cell(r.form, 'int'));
-    tr.appendChild(cell(r.phone, 'int'));
-    tr.appendChild(cell(r.plan, 'int'));
-    tr.appendChild(cell(r.bot, 'int'));
-    tr.appendChild(cell(r.sub, 'int'));
-    tr.appendChild(cell(r.cpa, 'money'));
-    tr.appendChild(cell(r.bounce, 'pct'));
-    tr.appendChild(cell(r.depth, 'float'));
-    tr.appendChild(cell(r.time, 'float'));
+    COLS.forEach(c => tr.appendChild(cell(r[c.key], c.kind, c.band)));
     tbody.appendChild(tr);
   });
 
-  status.textContent = filtered.length + ' строк · обновлено ' + (DATA.meta.updated_at || '—');
+  status.textContent = filtered.length + ' строк · обновлено ' + (DATA.meta.updated_at || '—')
+    + ' · селекторы в жёлтых ячейках';
 }
 
 async function boot() {
@@ -286,12 +435,13 @@ async function boot() {
   title.textContent = DATA.meta.title;
   meta.textContent = [
     'Счётчик ' + DATA.meta.counter,
+    'Период ' + DATA.meta.period.from + ' — ' + DATA.meta.period.to,
     DATA.meta.filter_note,
-    'Источники: ' + (DATA.meta.sources || []).join(', '),
   ].join(' · ');
   banner.textContent = (DATA.meta.pending && DATA.meta.pending.length)
     ? ('Пока пусто / в работе: ' + DATA.meta.pending.join('; '))
     : '';
+  banner.style.display = banner.textContent ? 'block' : 'none';
 
   const d = DATA.dictionaries;
   dateFrom.value = DATA.meta.period.from;
