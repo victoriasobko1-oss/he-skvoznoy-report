@@ -125,12 +125,28 @@ thead tr.group th.col-label { vertical-align: middle; font-size: 14px; }
 td.td-traffic:not(.cf) { background: var(--traffic); }
 td.td-micro:not(.cf) { background: var(--micro); }
 
-tr.grand td { font-weight: 700; }
+tr.grand td,
+tr.grand td.num,
+tr.grand td.col-label {
+  font-weight: 700 !important;
+}
 tr.grand td.col-label { background: var(--grand) !important; }
 tr.grand td.num:not(.cf) { background: var(--grand) !important; }
-tr.channel td { font-weight: 700; }
-tr.channel td.col-label { background: var(--channel); }
-tr.month td { font-weight: 400; }
+
+tr.channel td,
+tr.channel td.num,
+tr.channel td.col-label,
+tr.channel td.td-traffic,
+tr.channel td.td-micro {
+  font-weight: 700 !important;
+}
+tr.channel td.col-label { background: var(--channel) !important; }
+
+tr.month td,
+tr.month td.num,
+tr.month td.col-label {
+  font-weight: 400 !important;
+}
 tr.month td.col-label { padding-left: 34px; background: #fff; }
 tr.month:hover td.col-label { background: #f5f8ff; }
 tr.hidden { display: none; }
@@ -507,9 +523,10 @@ function cfScore(value, scale) {
   return t;
 }
 
-function cell(v, col, scales, applyCf) {
+function cell(v, col, scales, applyCf, bold) {
   const td = document.createElement('td');
   td.className = 'num td-' + col.band;
+  if (bold) td.style.fontWeight = '700';
   if (v == null || v === '') {
     td.classList.add('empty');
     td.textContent = '';
@@ -523,9 +540,9 @@ function cell(v, col, scales, applyCf) {
   return td;
 }
 
-function appendMetrics(tr, row, scales, applyCf) {
+function appendMetrics(tr, row, scales, applyCf, bold) {
   COLS.forEach(c => {
-    tr.appendChild(cell(row[c.key], c, scales, applyCf));
+    tr.appendChild(cell(row[c.key], c, scales, applyCf, bold));
   });
 }
 
@@ -611,7 +628,8 @@ function render() {
     name.textContent = g.head.label;
     label.appendChild(name);
     tr.appendChild(label);
-    appendMetrics(tr, g.head, scales, !isGrand);
+    label.style.fontWeight = '700';
+    appendMetrics(tr, g.head, scales, !isGrand, true);
 
     if (g.months.length) {
       tr.style.cursor = 'pointer';
@@ -627,7 +645,7 @@ function render() {
       ml.className = 'col-label';
       ml.textContent = m.label;
       mtr.appendChild(ml);
-      appendMetrics(mtr, m, scales, true);
+      appendMetrics(mtr, m, scales, true, false);
       el.tbody.appendChild(mtr);
     });
   });
