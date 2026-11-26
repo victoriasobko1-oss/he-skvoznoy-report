@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Сквозная отчетность | Магистратура</title>
+<style>
+:root {
+  --traffic: #fce5cd;
+  --micro: #e2ecfd;
+  --border: #c7c7c7;
+  --bg: #ececec;
+  --panel: #fff;
+  --accent: #1a73e8;
+  --warn: #fff2cc;
+  --muted: #666;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: #222; font: 13px/1.4 "Segoe UI", Arial, sans-serif; }
+.top { position: sticky; top: 0; z-index: 20; background: var(--panel); border-bottom: 1px solid #ccc; padding: 12px 16px 10px; }
+.top h1 { margin: 0 0 4px; font-size: 18px; }
+.meta { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px 12px;
+  align-items: end;
+  padding: 10px 12px;
+  background: #f7f7f7;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+.filters label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: #444; font-weight: 600; }
+.filters input, .filters select {
+  font: inherit; padding: 6px 8px; border: 1px solid #bbb; border-radius: 6px; background: #fff; min-height: 34px;
+}
+.filters .span2 { grid-column: span 2; }
+.dates { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hint { margin: 8px 0 0; font-size: 11px; color: #7a5a00; background: var(--warn); border: 1px solid #e0c36a; padding: 6px 10px; border-radius: 6px; }
+.wrap { padding: 12px 16px 40px; overflow: auto; }
+table.report { border-collapse: collapse; width: max-content; min-width: 100%; background: #fff; font-size: 12px; }
+table.report th, table.report td { border: 1px solid var(--border); padding: 4px 8px; white-space: nowrap; }
+table.report th { position: sticky; top: 0; background: var(--traffic); z-index: 5; font-weight: 600; }
+table.report th.micro { background: var(--micro); }
+table.report td.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.report td.channel { font-weight: 700; background: #f5f5f5; }
+table.report td.month { padding-left: 28px; color: #333; }
+table.report tr.grand td { background: #c5cadc; font-weight: 700; }
+table.report tr.total td { background: #e8eaf2; font-weight: 700; }
+.empty { color: #bbb; }
+.banner { font-size: 11px; color: #555; margin: 0 0 8px; }
+.status { font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="top">
+  <h1 id="title">Сквозная отчетность | Магистратура</h1>
+  <div class="meta" id="meta"></div>
+  <div class="filters" id="filters">
+    <label class="span2">Диапазон дат
+      <div class="dates">
+        <input type="date" id="dateFrom"/>
+        <input type="date" id="dateTo"/>
+      </div>
+    </label>
+    <label>Масштаб дат
+      <select id="scale"></select>
+    </label>
+    <label>UTM Source
+      <select id="utmSource"></select>
+    </label>
+    <label>UTM Medium
+      <select id="utmMedium"></select>
+    </label>
+    <label>UTM Campaign
+      <select id="utmCampaign"></select>
+    </label>
+    <label>UTM Content
+      <select id="utmContent"></select>
+    </label>
+    <label>Точка входа
+      <select id="entry"></select>
+    </label>
+    <label>Канал (макро)
+      <select id="channel"></select>
+    </label>
+    <label>Тип кампаний
+      <select id="campaignType"></select>
+    </label>
+    <label>Количество недель
+      <input type="number" id="weeks" min="1" max="52" placeholder="пусто = выкл"/>
+    </label>
+  </div>
+  <p class="hint" id="hint"></p>
+</div>
+
+<div class="wrap">
+  <p class="banner" id="banner"></p>
+  <p class="status" id="status"></p>
+  <table class="report" id="table">
+    <thead>
+      <tr>
+        <th>Канал / период</th>
+        <th>Расходы</th>
+        <th>Показы</th>
+        <th>Клики</th>
+        <th>Визиты</th>
+        <th>Посетители</th>
+        <th>CTR</th>
+        <th>CPC</th>
+        <th>CPU</th>
+        <th class="micro">CR форма</th>
+        <th class="micro">Форма</th>
+        <th class="micro">Телефон</th>
+        <th class="micro">Уч. план</th>
+        <th class="micro">Бот</th>
+        <th class="micro">Подписка</th>
+        <th class="micro">CPA</th>
+        <th class="micro">Отказы</th>
+        <th class="micro">Глубина</th>
+        <th class="micro">Время</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<script>
+const METRIC_KEYS = ['spend','impressions','clicks','visits','users','ctr','cpc','cpu','cr_form','form','phone','plan','bot','sub','cpa','bounce','depth','time'];
+const fmt = {
+  int: v => v == null || v === '' ? '—' : Number(v).toLocaleString('ru-RU'),
+  pct: v => v == null || v === '' ? '—' : (Number(v) * (Number(v) > 1 ? 1 : 100)).toFixed(2).replace('.', ',') + '%',
+  money: v => v == null || v === '' ? '—' : Number(v).toLocaleString('ru-RU') + ' ₽',
+  num: v => v == null || v === '' ? '—' : Number(v).toLocaleString('ru-RU', {maximumFractionDigits: 2}),
+};
+
+let DATA = null;
+
+function fillSelect(el, values, selected) {
+  el.innerHTML = '';
+  values.forEach(v => {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = v;
+    if (v === selected) o.selected = true;
+    el.appendChild(o);
+  });
+}
+
+function parseDate(s) {
+  if (!s) return null;
+  const d = new Date(s + 'T00:00:00');
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function overlaps(aFrom, aTo, bFrom, bTo) {
+  return aFrom <= bTo && aTo >= bFrom;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate() - n);
+  return d;
+}
+
+function filterRows(rows, f) {
+  const from = parseDate(f.dateFrom);
+  const to = parseDate(f.dateTo);
+  const weeksOn = f.weeks !== '' && f.weeks != null && !Number.isNaN(Number(f.weeks));
+  const weekCut = weeksOn ? daysAgo(Number(f.weeks) * 7) : null;
+  const fullFrom = parseDate(DATA.meta.period.from);
+  const fullTo = parseDate(DATA.meta.period.to);
+  const fullRange = from && to && from.getTime() === fullFrom.getTime() && to.getTime() === fullTo.getTime();
+
+  return rows.filter(r => {
+    if (f.channel !== '(все)' && r.channel_key !== f.channel) return false;
+    if (f.campaignType !== '(все)') {
+      if (r.campaign_type === 'ALL') return false;
+      if (r.campaign_type !== f.campaignType) return false;
+    }
+    if (r.row_kind === 'grand' && (f.channel !== '(все)' || f.campaignType !== '(все)')) return false;
+
+    const rf = parseDate(r.date_from);
+    const rt = parseDate(r.date_to);
+    if (!rf || !rt || !from || !to) return false;
+
+    if (r.row_kind === 'month') {
+      if (!overlaps(rf, rt, from, to)) return false;
+      if (weekCut && rt < weekCut) return false;
+      return true;
+    }
+
+    // totals / grand: only when date range is full snapshot period
+    if ((r.row_kind === 'total' || r.row_kind === 'grand') && !fullRange) return false;
+    if (weeksOn && (r.row_kind === 'total' || r.row_kind === 'grand')) return false;
+    return true;
+  }).sort((a,b) => a.sort - b.sort);
+}
+
+function cell(v, kind) {
+  const td = document.createElement('td');
+  td.className = 'num';
+  if (v == null) { td.classList.add('empty'); td.textContent = '—'; return td; }
+  if (kind === 'pct') td.textContent = fmt.pct(v);
+  else if (kind === 'money') td.textContent = fmt.money(v);
+  else if (kind === 'float') td.textContent = fmt.num(v);
+  else td.textContent = fmt.int(v);
+  return td;
+}
+
+function render() {
+  const f = {
+    dateFrom: dateFrom.value,
+    dateTo: dateTo.value,
+    scale: scale.value,
+    utmSource: utmSource.value,
+    utmMedium: utmMedium.value,
+    utmCampaign: utmCampaign.value,
+    utmContent: utmContent.value,
+    entry: entry.value,
+    channel: channel.value,
+    campaignType: campaignType.value,
+    weeks: weeks.value,
+  };
+
+  const hints = [];
+  if (f.scale !== 'Месяц') hints.push('Масштаб «' + f.scale + '»: в текущем data.json только месячное зерно — показаны месяцы.');
+  if ([f.utmSource, f.utmMedium, f.utmCampaign, f.utmContent].some(x => x !== '(все)')) {
+    hints.push('UTM-фильтры пока не режут: в витрине нет UTM-разреза (после выгрузки появятся в словаре и в строках).');
+  }
+  if (f.entry !== '(все)') hints.push('Точка входа: справочник есть, к цифрам Метрики ещё не пришита (нужна склейка с amo).');
+  hint.textContent = hints.join(' ');
+  hint.style.display = hints.length ? 'block' : 'none';
+
+  const filtered = filterRows(DATA.rows, f);
+  tbody.innerHTML = '';
+  if (!filtered.length) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 19;
+    td.textContent = 'Нет строк под выбранные фильтры';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+    status.textContent = '0 строк';
+    return;
+  }
+
+  filtered.forEach(r => {
+    const tr = document.createElement('tr');
+    if (r.row_kind === 'grand') tr.className = 'grand';
+    else if (r.row_kind === 'total') tr.className = 'total';
+
+    const label = document.createElement('td');
+    if (r.row_kind === 'month') label.className = 'month';
+    else label.className = 'channel';
+    label.textContent = r.label;
+    tr.appendChild(label);
+
+    tr.appendChild(cell(r.spend, 'money'));
+    tr.appendChild(cell(r.impressions, 'int'));
+    tr.appendChild(cell(r.clicks, 'int'));
+    tr.appendChild(cell(r.visits, 'int'));
+    tr.appendChild(cell(r.users, 'int'));
+    tr.appendChild(cell(r.ctr, 'pct'));
+    tr.appendChild(cell(r.cpc, 'money'));
+    tr.appendChild(cell(r.cpu, 'money'));
+    tr.appendChild(cell(r.cr_form, 'pct'));
+    tr.appendChild(cell(r.form, 'int'));
+    tr.appendChild(cell(r.phone, 'int'));
+    tr.appendChild(cell(r.plan, 'int'));
+    tr.appendChild(cell(r.bot, 'int'));
+    tr.appendChild(cell(r.sub, 'int'));
+    tr.appendChild(cell(r.cpa, 'money'));
+    tr.appendChild(cell(r.bounce, 'pct'));
+    tr.appendChild(cell(r.depth, 'float'));
+    tr.appendChild(cell(r.time, 'float'));
+    tbody.appendChild(tr);
+  });
+
+  status.textContent = filtered.length + ' строк · обновлено ' + (DATA.meta.updated_at || '—');
+}
+
+async function boot() {
+  const res = await fetch('data.json?_=' + Date.now());
+  DATA = await res.json();
+  title.textContent = DATA.meta.title;
+  meta.textContent = [
+    'Счётчик ' + DATA.meta.counter,
+    DATA.meta.filter_note,
+    'Источники: ' + (DATA.meta.sources || []).join(', '),
+  ].join(' · ');
+  banner.textContent = (DATA.meta.pending && DATA.meta.pending.length)
+    ? ('Пока пусто / в работе: ' + DATA.meta.pending.join('; '))
+    : '';
+
+  const d = DATA.dictionaries;
+  dateFrom.value = DATA.meta.period.from;
+  dateTo.value = DATA.meta.period.to;
+  fillSelect(scale, d.scales, 'Месяц');
+  fillSelect(utmSource, d.utm_source, '(все)');
+  fillSelect(utmMedium, d.utm_medium, '(все)');
+  fillSelect(utmCampaign, d.utm_campaign, '(все)');
+  fillSelect(utmContent, d.utm_content, '(все)');
+  fillSelect(entry, d.entry_points, '(все)');
+  fillSelect(channel, d.channels, '(все)');
+  fillSelect(campaignType, d.campaign_types, '(все)');
+
+  ['dateFrom','dateTo','scale','utmSource','utmMedium','utmCampaign','utmContent','entry','channel','campaignType','weeks']
+    .forEach(id => document.getElementById(id).addEventListener('input', render));
+  render();
+}
+
+boot().catch(err => {
+  status.textContent = 'Не удалось загрузить data.json: ' + err.message;
+});
+</script>
+</body>
+</html>
