@@ -651,9 +651,12 @@ function render() {
   });
 
   const openCount = [...expanded.values()].filter(Boolean).length;
-  el.status.textContent = groups.length + ' групп · раскрыто ' + openCount
-    + ' · CF: зелёный = лучше, красный = хуже (относительно видимых строк)'
-    + ' · обновлено ' + (DATA.meta.updated_at || '—');
+  el.status.textContent = 'Фильтр: ' + f.dateFrom + ' — ' + f.dateTo
+    + ' · канал: ' + f.channel
+    + ' · тип: ' + f.campaignType
+    + ' · групп: ' + groups.length
+    + ' · раскрыто: ' + openCount
+    + ' · данные: ' + (DATA.meta.updated_at || '—');
 }
 
 function expandAll(open) {
@@ -661,6 +664,13 @@ function expandAll(open) {
     if (r.row_kind === 'total' || r.row_kind === 'grand') expanded.set(r.channel_key, open);
   });
   render();
+}
+
+function applyDateSelection(selectedDates) {
+  if (!selectedDates || selectedDates.length < 2) return false;
+  el.dateFrom.value = flatpickr.formatDate(selectedDates[0], 'Y-m-d');
+  el.dateTo.value = flatpickr.formatDate(selectedDates[1], 'Y-m-d');
+  return true;
 }
 
 function initDateRange(from, to) {
@@ -673,21 +683,26 @@ function initDateRange(from, to) {
     locale: 'ru',
     defaultDate: [from, to],
     allowInput: false,
-    onClose: function(selectedDates) {
-      if (selectedDates.length === 1) {
-        // keep open until range complete — flatpickr handles; if only one, use same day
-        const d = flatpickr.formatDate(selectedDates[0], 'Y-m-d');
-        el.dateFrom.value = d;
-        el.dateTo.value = d;
-        render();
-        return;
-      }
-      if (selectedDates.length >= 2) {
-        el.dateFrom.value = flatpickr.formatDate(selectedDates[0], 'Y-m-d');
-        el.dateTo.value = flatpickr.formatDate(selectedDates[1], 'Y-m-d');
-        render();
-      }
+    onChange: function(selectedDates) {
+      // Пересчёт сразу, как только выбран полный диапазон от–до
+      if (applyDateSelection(selectedDates)) render();
     },
+    onClose: function(selectedDates) {
+      if (applyDateSelection(selectedDates)) render();
+    },
+  });
+}
+
+function bindFilters() {
+  const toolbar = document.querySelector('.toolbar');
+  // change — надёжно для <select>; input — для числового «Недели»
+  ['change', 'input'].forEach(evt => {
+    toolbar.addEventListener(evt, e => {
+      const t = e.target;
+      if (!t || t.id === 'dateRange') return;
+      if (t.tagName !== 'SELECT' && t.tagName !== 'INPUT') return;
+      render();
+    });
   });
 }
 
@@ -718,9 +733,7 @@ async function boot() {
   fillSelect(el.channel, d.channels, '(все)');
   fillSelect(el.campaignType, d.campaign_types, '(все)');
 
-  [el.scale, el.utmSource, el.utmMedium, el.utmCampaign, el.utmContent, el.entry, el.channel, el.campaignType, el.weeks]
-    .forEach(node => node.addEventListener('input', render));
-
+  bindFilters();
   el.expandAll.addEventListener('click', () => expandAll(true));
   el.collapseAll.addEventListener('click', () => expandAll(false));
 
