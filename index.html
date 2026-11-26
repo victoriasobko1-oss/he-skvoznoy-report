@@ -360,6 +360,16 @@ function daysAgo(n) {
   return d;
 }
 
+function scaleGrain(scale) {
+  if (scale === 'Неделя') return 'week';
+  if (scale === 'День') return 'day';
+  return 'month';
+}
+
+function isPeriodRow(r) {
+  return r.row_kind === 'month' || r.row_kind === 'week' || r.row_kind === 'day';
+}
+
 function filterRows(rows, f) {
   const from = parseDate(f.dateFrom);
   const to = parseDate(f.dateTo);
@@ -368,6 +378,8 @@ function filterRows(rows, f) {
   const fullFrom = parseDate(DATA.meta.period.from);
   const fullTo = parseDate(DATA.meta.period.to);
   const fullRange = from && to && from.getTime() === fullFrom.getTime() && to.getTime() === fullTo.getTime();
+  const wantGrain = scaleGrain(f.scale);
+  const hasGrain = rows.some(r => r.row_kind === wantGrain || r.grain === wantGrain);
 
   return rows.filter(r => {
     if (f.channel !== '(все)' && r.channel_key !== f.channel) return false;
@@ -381,11 +393,15 @@ function filterRows(rows, f) {
     const rt = parseDate(r.date_to);
     if (!rf || !rt || !from || !to) return false;
 
-    if (r.row_kind === 'month') {
+    if (isPeriodRow(r)) {
+      const g = r.grain || r.row_kind;
+      if (g !== wantGrain) return false;
+      if (!hasGrain && wantGrain !== 'month') return false;
       if (!overlaps(rf, rt, from, to)) return false;
       if (weekCut && rt < weekCut) return false;
       return true;
     }
+    // totals / grand: keep as shells; values re-rolled from visible periods
     if ((r.row_kind === 'total' || r.row_kind === 'grand') && !fullRange) return false;
     if (weeksOn && (r.row_kind === 'total' || r.row_kind === 'grand')) return false;
     return true;
@@ -461,7 +477,7 @@ function groupRows(rows) {
       if (!expanded.has(r.channel_key)) expanded.set(r.channel_key, false);
       return;
     }
-    if (r.row_kind !== 'month') return;
+    if (!isPeriodRow(r)) return;
     if (!cur || cur.head.channel_key !== r.channel_key) {
       cur = {
         head: {
@@ -479,8 +495,7 @@ function groupRows(rows) {
     cur.months.push(r);
   });
 
-  // Always roll up visible months into channel/grand headers so collapsed view stays filled
-  // when the date range is narrower than the snapshot totals.
+  // Roll up visible periods into channel/grand headers (works for month/week/day).
   groups.forEach(g => {
     if (!g.months.length) return;
     Object.assign(g.head, aggregateMetrics(g.months));
@@ -586,8 +601,12 @@ function render() {
     weeks: el.weeks.value,
   };
 
+  const wantGrain = scaleGrain(f.scale);
+  const hasGrain = DATA.rows.some(r => r.row_kind === wantGrain || r.grain === wantGrain);
   const hints = [];
-  if (f.scale !== 'Месяц') hints.push('Масштаб «' + f.scale + '»: в данных пока только месяцы.');
+  if (!hasGrain && f.scale !== 'Месяц') {
+    hints.push('Масштаб «' + f.scale + '»: зерно ещё подгружается из Метрики. Пока выбери «Месяц» или подожди обновления data.json.');
+  }
   if ([f.utmSource, f.utmMedium, f.utmCampaign, f.utmContent].some(x => x !== '(все)')) {
     hints.push('UTM пока не режет витрину.');
   }
@@ -603,7 +622,9 @@ function render() {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
     td.colSpan = COLS.length + 1;
-    td.textContent = 'Нет строк под выбранные фильтры';
+    td.textContent = hasGrain
+      ? 'Нет строк под выбранные фильтры'
+      : ('Нет данных для масштаба «' + f.scale + '»');
     td.style.padding = '12px';
     tr.appendChild(td);
     el.tbody.appendChild(tr);
