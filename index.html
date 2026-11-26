@@ -125,10 +125,13 @@ thead tr.group th.col-label { vertical-align: middle; font-size: 14px; }
 td.td-traffic:not(.cf) { background: var(--traffic); }
 td.td-micro:not(.cf) { background: var(--micro); }
 
-tr.grand td.col-label { background: var(--grand) !important; font-weight: 700; }
-tr.grand td.num:not(.cf) { background: var(--grand) !important; font-weight: 700; }
-tr.channel td.col-label { background: var(--channel); font-weight: 700; }
-tr.month td.col-label { padding-left: 34px; font-weight: 400; background: #fff; }
+tr.grand td { font-weight: 700; }
+tr.grand td.col-label { background: var(--grand) !important; }
+tr.grand td.num:not(.cf) { background: var(--grand) !important; }
+tr.channel td { font-weight: 700; }
+tr.channel td.col-label { background: var(--channel); }
+tr.month td { font-weight: 400; }
+tr.month td.col-label { padding-left: 34px; background: #fff; }
 tr.month:hover td.col-label { background: #f5f8ff; }
 tr.hidden { display: none; }
 
