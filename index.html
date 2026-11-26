@@ -6,223 +6,140 @@
 <title>Сквозная отчетность | Магистратура</title>
 <style>
 :root {
-  --bg: #f0f2f5;
-  --panel: #ffffff;
-  --line: #e3e6eb;
-  --line-strong: #c9ced6;
-  --text: #1f2328;
-  --muted: #6b7280;
-  --traffic: #fff1d6;
-  --traffic-h: #ffe0a8;
-  --micro: #e8f0fe;
-  --micro-h: #d2e3fc;
-  --grand: #dce0ea;
-  --channel: #eef0f4;
-  --filter: #fff8db;
-  --accent: #2563eb;
-  --hover: #f5f8ff;
-  --font: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --mono: "IBM Plex Mono", "SF Mono", ui-monospace, Menlo, monospace;
+  --bg: #eceff3;
+  --panel: #fff;
+  --line: #c7c7c7;
+  --text: #222;
+  --muted: #666;
+  --traffic: #fce5cd;
+  --micro: #e2ecfd;
+  --grand: #c5cadc;
+  --channel: #e8eaf2;
+  --filter: #fff2cc;
+  --accent: #1a73e8;
+  --font: Arial, Helvetica, sans-serif;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
-  font: 13px/1.35 var(--font); }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 12px/1.3 var(--font); }
 .layout { display: flex; flex-direction: column; height: 100vh; min-height: 0; }
 
-.top {
-  flex: 0 0 auto;
-  background: var(--panel);
-  border-bottom: 1px solid var(--line-strong);
-  padding: 12px 16px 10px;
-}
-.top h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
-.meta { margin: 4px 0 10px; color: var(--muted); font-size: 12px; line-height: 1.4; max-width: 1100px; }
+.top { flex: 0 0 auto; background: var(--panel); border-bottom: 1px solid #bbb; padding: 10px 14px 8px; }
+.top h1 { margin: 0; font-size: 16px; font-weight: 700; }
+.meta { margin: 4px 0 8px; color: var(--muted); font-size: 11px; line-height: 1.35; }
 
-.toolbar {
-  display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin-bottom: 8px;
-}
-.toolbar .group {
-  display: grid; gap: 3px;
-}
-.toolbar label {
-  font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.01em;
-}
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+.toolbar .group { display: grid; gap: 2px; }
+.toolbar label { font-size: 10px; font-weight: 700; color: #555; }
 .toolbar input, .toolbar select {
-  height: 30px; min-width: 0; padding: 0 8px;
-  border: 1px solid var(--line-strong); border-radius: 6px;
-  background: var(--filter); font: 12.5px/1 var(--font); color: var(--text);
+  height: 28px; padding: 0 6px; border: 1px solid #999; background: var(--filter);
+  font: 12px var(--font); border-radius: 2px; min-width: 0;
 }
-.toolbar .dates { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 220px; }
-.toolbar .w-scale { width: 110px; }
-.toolbar .w-utm { width: 120px; }
-.toolbar .w-entry { width: 120px; }
-.toolbar .w-channel { width: 140px; }
-.toolbar .w-type { width: 140px; }
-.toolbar .w-weeks { width: 90px; }
-.toolbar .actions { display: flex; gap: 6px; margin-left: auto; }
+.toolbar .dates { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; width: 210px; }
+.toolbar .w-sm { width: 108px; }
+.toolbar .w-md { width: 130px; }
+.toolbar .w-weeks { width: 80px; }
+.actions { display: flex; gap: 6px; margin-left: auto; }
 .btn {
-  height: 30px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 6px;
-  background: #fff; font: 12px/1 var(--font); cursor: pointer; color: var(--text);
+  height: 28px; padding: 0 10px; border: 1px solid #999; background: #fff;
+  font: 12px var(--font); cursor: pointer; border-radius: 2px;
 }
 .btn:hover { border-color: var(--accent); color: var(--accent); }
 
-.hint, .banner {
-  margin: 6px 0 0; padding: 7px 10px; border-radius: 6px; font-size: 12px; line-height: 1.35;
-}
-.hint { display: none; background: #fff6da; color: #7a5b00; border: 1px solid #f0d789; }
-.banner { background: #f7f8fa; color: var(--muted); border: 1px solid var(--line); }
+.hint, .banner { margin: 8px 0 0; padding: 6px 8px; font-size: 11px; border: 1px solid #e0c36a; background: #fff8e1; color: #6b5300; }
+.hint { display: none; }
+.banner { color: #555; }
 
-.sheet-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 0 12px 8px; }
+.sheet-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; background: #fff; }
 table.sheet {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: var(--panel);
-  table-layout: fixed;
-  font-size: 12.5px;
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
-  overflow: hidden;
+  border-collapse: collapse;
+  background: #fff;
+  min-width: max-content;
+  width: max-content;
+  font-size: 11px;
 }
 table.sheet th, table.sheet td {
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  padding: 0 6px;
-  height: 28px;
+  border: 1px solid var(--line);
+  padding: 3px 6px;
   vertical-align: middle;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
+  height: 22px;
 }
-table.sheet th:last-child, table.sheet td:last-child { border-right: none; }
-
 thead th {
-  position: sticky; z-index: 5;
-  font-size: 11px; font-weight: 600; text-align: center;
-  color: #374151;
+  position: sticky; z-index: 5; font-weight: 700; text-align: center;
+  box-shadow: inset 0 -1px 0 var(--line);
 }
-thead tr.group th { top: 0; height: 26px; font-size: 11px; letter-spacing: 0.02em; text-transform: uppercase; }
-thead tr.metrics th { top: 26px; height: 34px; font-size: 11px; font-weight: 600; line-height: 1.15; white-space: normal; }
+thead tr.group th { top: 0; }
+thead tr.metrics th { top: 24px; white-space: normal; line-height: 1.2; max-width: 110px; min-width: 88px; }
+thead tr.source th { top: 58px; font-weight: 400; font-size: 9px; color: #555; max-width: 110px; white-space: normal; line-height: 1.15; }
 
-.th-traffic { background: var(--traffic-h); }
-.th-micro { background: var(--micro-h); }
-.td-traffic { background: var(--traffic); }
-.td-micro { background: var(--micro); }
+.th-traffic, .td-traffic { background: var(--traffic) !important; }
+.th-micro, .td-micro { background: var(--micro) !important; }
+.th-src { background: #f7f7f7 !important; }
 
-.col-label { width: 18%; min-width: 180px; text-align: left !important; }
-th.col-label, td.col-label {
-  position: sticky; left: 0; z-index: 4; background: #fff;
-  border-right: 1px solid var(--line-strong);
+.col-label {
+  position: sticky; left: 0; z-index: 4;
+  min-width: 260px; max-width: 320px; width: 280px;
+  text-align: left !important; background: #fff;
+  white-space: normal; line-height: 1.2;
 }
-thead th.col-label { z-index: 6; background: #f3f4f6; text-align: left !important; padding-left: 10px; }
+thead th.col-label { z-index: 6; background: #f2f2f2; top: 0; height: auto; }
+/* label spans 3 header rows */
+thead tr.group th.col-label { vertical-align: middle; }
 
-.num {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  font-family: var(--mono);
-  font-size: 12px;
-}
-.empty { color: #c4c9d1; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.empty { color: #bbb; text-align: right; }
 
 tr.grand td { background: var(--grand) !important; font-weight: 700; }
 tr.grand td.col-label { background: var(--grand) !important; }
-
 tr.channel td { background: var(--channel); }
-tr.channel td.col-label { background: var(--channel); font-weight: 600; }
-tr.channel td.td-traffic { background: #f4e6c8; }
-tr.channel td.td-micro { background: #d9e6fb; }
-tr.channel:hover td { filter: brightness(0.985); }
-
-tr.month td.col-label { padding-left: 28px; color: #374151; font-weight: 450; }
-tr.month:hover td { background: var(--hover) !important; }
-
+tr.channel td.col-label { background: var(--channel); font-weight: 700; }
+tr.channel td.td-traffic { background: #f8d9a8 !important; }
+tr.channel td.td-micro { background: #c9d8f7 !important; }
+tr.month td.col-label { padding-left: 34px; font-weight: 400; }
+tr.month:hover td { filter: brightness(0.98); }
 tr.hidden { display: none; }
 
 .toggle {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 18px; height: 18px; margin-right: 6px; border-radius: 4px;
-  border: 1px solid var(--line-strong); background: #fff; color: #111;
-  font: 700 12px/1 var(--mono); cursor: pointer; vertical-align: middle;
+  width: 16px; height: 16px; margin-right: 6px; border: 1px solid #888;
+  background: #fff; font: 700 12px/1 Arial, sans-serif; cursor: pointer; vertical-align: middle;
 }
 .toggle:hover { border-color: var(--accent); color: var(--accent); }
-.toggle[aria-expanded="true"] { background: #eff6ff; border-color: #93c5fd; color: var(--accent); }
-.channel-name { vertical-align: middle; }
+.toggle[aria-expanded="true"] { background: #e8f0fe; border-color: var(--accent); color: var(--accent); }
 
 .status {
-  flex: 0 0 auto;
-  padding: 6px 16px;
-  font-size: 11.5px;
-  color: var(--muted);
-  background: #f7f8fa;
-  border-top: 1px solid var(--line);
-}
-
-@media (max-width: 1100px) {
-  .toolbar .w-utm { width: 100px; }
-  table.sheet { font-size: 12px; }
-  .num { font-size: 11.5px; }
+  flex: 0 0 auto; padding: 5px 12px; font-size: 11px; color: var(--muted);
+  background: #f3f3f3; border-top: 1px solid #ccc;
 }
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 <div class="layout">
   <div class="top">
-    <h1 id="title">Сквозная отчетность | Магистратура</h1>
+    <h1 id="title">Прототип сквозной отчетности | Магистратура</h1>
     <div class="meta" id="meta"></div>
-
     <div class="toolbar">
       <div class="group">
-        <label>Период</label>
+        <label>Диапазон дат (от / до)</label>
         <div class="dates">
-          <input type="date" id="dateFrom" title="От"/>
-          <input type="date" id="dateTo" title="До"/>
+          <input type="date" id="dateFrom"/>
+          <input type="date" id="dateTo"/>
         </div>
       </div>
-      <div class="group">
-        <label>Масштаб</label>
-        <select id="scale" class="w-scale"></select>
-      </div>
-      <div class="group">
-        <label>UTM Source</label>
-        <select id="utmSource" class="w-utm"></select>
-      </div>
-      <div class="group">
-        <label>UTM Medium</label>
-        <select id="utmMedium" class="w-utm"></select>
-      </div>
-      <div class="group">
-        <label>UTM Campaign</label>
-        <select id="utmCampaign" class="w-utm"></select>
-      </div>
-      <div class="group">
-        <label>UTM Content</label>
-        <select id="utmContent" class="w-utm"></select>
-      </div>
-      <div class="group">
-        <label>Точка входа</label>
-        <select id="entry" class="w-entry"></select>
-      </div>
-      <div class="group">
-        <label>Канал</label>
-        <select id="channel" class="w-channel"></select>
-      </div>
-      <div class="group">
-        <label>Тип кампаний</label>
-        <select id="campaignType" class="w-type"></select>
-      </div>
-      <div class="group">
-        <label>Недели</label>
-        <input type="number" id="weeks" class="w-weeks" min="1" max="52" placeholder="выкл"/>
-      </div>
+      <div class="group"><label>Масштаб дат</label><select id="scale" class="w-sm"></select></div>
+      <div class="group"><label>UTM Source</label><select id="utmSource" class="w-sm"></select></div>
+      <div class="group"><label>UTM Medium</label><select id="utmMedium" class="w-sm"></select></div>
+      <div class="group"><label>UTM Campaign</label><select id="utmCampaign" class="w-md"></select></div>
+      <div class="group"><label>UTM Content</label><select id="utmContent" class="w-sm"></select></div>
+      <div class="group"><label>Точка входа</label><select id="entry" class="w-sm"></select></div>
+      <div class="group"><label>Канал (макро)</label><select id="channel" class="w-md"></select></div>
+      <div class="group"><label>Тип кампаний</label><select id="campaignType" class="w-md"></select></div>
+      <div class="group"><label>Количество недель</label><input type="number" id="weeks" class="w-weeks" min="1" max="52" placeholder="выкл"/></div>
       <div class="actions">
         <button type="button" class="btn" id="expandAll">Раскрыть все</button>
         <button type="button" class="btn" id="collapseAll">Свернуть все</button>
       </div>
     </div>
-
     <div class="hint" id="hint"></div>
     <div class="banner" id="banner"></div>
   </div>
@@ -231,39 +148,77 @@ tr.hidden { display: none; }
     <table class="sheet" id="table">
       <thead>
         <tr class="group">
-          <th class="col-label" rowspan="2">Канал / период</th>
+          <th class="col-label" rowspan="3">Канал / период</th>
           <th class="th-traffic" colspan="8">Трафик</th>
           <th class="th-micro" colspan="10">Микроконверсии</th>
         </tr>
-        <tr class="metrics" id="metricHead"></tr>
+        <tr class="metrics">
+          <th class="th-traffic">Расходы</th>
+          <th class="th-traffic">Показы</th>
+          <th class="th-traffic">Клики</th>
+          <th class="th-traffic">Визиты</th>
+          <th class="th-traffic">Посетители кросс-девайс</th>
+          <th class="th-traffic">CTR</th>
+          <th class="th-traffic">CPC</th>
+          <th class="th-traffic">CPU</th>
+          <th class="th-micro">CR: визит → отправка формы</th>
+          <th class="th-micro">Отправка Яндекс Формы</th>
+          <th class="th-micro">Клики по номеру телефона</th>
+          <th class="th-micro">Смотрели учебный план</th>
+          <th class="th-micro">Перешли в бот</th>
+          <th class="th-micro">Подписались на канал</th>
+          <th class="th-micro">CPA</th>
+          <th class="th-micro">Отказы</th>
+          <th class="th-micro">Глубина просмотра</th>
+          <th class="th-micro">Время на сайте</th>
+        </tr>
+        <tr class="source">
+          <th class="th-src">Рекламные площадки (Яндекс Директ, ВК Реклама, TG Ads и пр.)</th>
+          <th class="th-src">Рекламные площадки (Яндекс Директ, ВК Реклама, TG Ads и пр.)</th>
+          <th class="th-src">Яндекс Директ</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Мера / вычисляемое поле</th>
+          <th class="th-src">Мера / вычисляемое поле</th>
+          <th class="th-src">Мера / вычисляемое поле</th>
+          <th class="th-src">Мера / вычисляемое поле</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Мера / вычисляемое поле</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+          <th class="th-src">Яндекс Метрика</th>
+        </tr>
       </thead>
       <tbody id="tbody"></tbody>
     </table>
   </div>
-  <div class="status" id="status"></div>
+  <div class="status" id="status">Загрузка…</div>
 </div>
 
 <script>
-/** Short headers fit viewport; full name in title tooltip */
 const COLS = [
-  { key: 'spend', short: 'Расход', full: 'Расходы', kind: 'money', band: 'traffic' },
-  { key: 'impressions', short: 'Показы', full: 'Показы', kind: 'int', band: 'traffic' },
-  { key: 'clicks', short: 'Клики', full: 'Клики', kind: 'int', band: 'traffic' },
-  { key: 'visits', short: 'Визиты', full: 'Визиты', kind: 'int', band: 'traffic' },
-  { key: 'users', short: 'Посет.', full: 'Посетители кросс-девайс', kind: 'int', band: 'traffic' },
-  { key: 'ctr', short: 'CTR', full: 'CTR', kind: 'pct', band: 'traffic' },
-  { key: 'cpc', short: 'CPC', full: 'CPC', kind: 'money', band: 'traffic' },
-  { key: 'cpu', short: 'CPU', full: 'CPU', kind: 'money', band: 'traffic' },
-  { key: 'cr_form', short: 'CR формы', full: 'CR: визит → отправка формы', kind: 'pct', band: 'micro' },
-  { key: 'form', short: 'Форма', full: 'Отправка Яндекс Формы', kind: 'int', band: 'micro' },
-  { key: 'phone', short: 'Телефон', full: 'Клики по номеру телефона', kind: 'int', band: 'micro' },
-  { key: 'plan', short: 'Уч.план', full: 'Смотрели учебный план', kind: 'int', band: 'micro' },
-  { key: 'bot', short: 'Бот', full: 'Перешли в бот', kind: 'int', band: 'micro' },
-  { key: 'sub', short: 'Подп.', full: 'Подписались на канал', kind: 'int', band: 'micro' },
-  { key: 'cpa', short: 'CPA', full: 'CPA', kind: 'money', band: 'micro' },
-  { key: 'bounce', short: 'Отказы', full: 'Отказы', kind: 'pct', band: 'micro' },
-  { key: 'depth', short: 'Глубина', full: 'Глубина просмотра', kind: 'float', band: 'micro' },
-  { key: 'time', short: 'Время', full: 'Время на сайте', kind: 'float', band: 'micro' },
+  { key: 'spend', kind: 'money', band: 'traffic' },
+  { key: 'impressions', kind: 'int', band: 'traffic' },
+  { key: 'clicks', kind: 'int', band: 'traffic' },
+  { key: 'visits', kind: 'int', band: 'traffic' },
+  { key: 'users', kind: 'int', band: 'traffic' },
+  { key: 'ctr', kind: 'pct', band: 'traffic' },
+  { key: 'cpc', kind: 'money', band: 'traffic' },
+  { key: 'cpu', kind: 'money', band: 'traffic' },
+  { key: 'cr_form', kind: 'pct', band: 'micro' },
+  { key: 'form', kind: 'int', band: 'micro' },
+  { key: 'phone', kind: 'int', band: 'micro' },
+  { key: 'plan', kind: 'int', band: 'micro' },
+  { key: 'bot', kind: 'int', band: 'micro' },
+  { key: 'sub', kind: 'int', band: 'micro' },
+  { key: 'cpa', kind: 'money', band: 'micro' },
+  { key: 'bounce', kind: 'pct', band: 'micro' },
+  { key: 'depth', kind: 'float', band: 'micro' },
+  { key: 'time', kind: 'float', band: 'micro' },
 ];
 
 const fmt = {
@@ -271,27 +226,45 @@ const fmt = {
   pct: v => {
     const n = Number(v);
     const p = n > 1 ? n : n * 100;
-    return p.toFixed(1).replace('.', ',') + '%';
+    return p.toFixed(2).replace('.', ',') + '%';
   },
-  money: v => {
-    const n = Number(v);
-    if (Math.abs(n) >= 1000) return Math.round(n).toLocaleString('ru-RU');
-    return n.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
-  },
-  float: v => Number(v).toLocaleString('ru-RU', { maximumFractionDigits: 1 }),
+  money: v => Number(v).toLocaleString('ru-RU') + ' ₽',
+  float: v => Number(v).toLocaleString('ru-RU', { maximumFractionDigits: 2 }),
 };
 
 let DATA = null;
-/** channel_key -> expanded */
 const expanded = new Map();
 
-function fillSelect(el, values, selected) {
-  el.innerHTML = '';
+const el = {
+  title: document.getElementById('title'),
+  meta: document.getElementById('meta'),
+  hint: document.getElementById('hint'),
+  banner: document.getElementById('banner'),
+  status: document.getElementById('status'),
+  tbody: document.getElementById('tbody'),
+  dateFrom: document.getElementById('dateFrom'),
+  dateTo: document.getElementById('dateTo'),
+  scale: document.getElementById('scale'),
+  utmSource: document.getElementById('utmSource'),
+  utmMedium: document.getElementById('utmMedium'),
+  utmCampaign: document.getElementById('utmCampaign'),
+  utmContent: document.getElementById('utmContent'),
+  entry: document.getElementById('entry'),
+  channel: document.getElementById('channel'),
+  campaignType: document.getElementById('campaignType'),
+  weeks: document.getElementById('weeks'),
+  expandAll: document.getElementById('expandAll'),
+  collapseAll: document.getElementById('collapseAll'),
+};
+
+function fillSelect(node, values, selected) {
+  node.innerHTML = '';
   values.forEach(v => {
     const o = document.createElement('option');
-    o.value = v; o.textContent = v;
+    o.value = v;
+    o.textContent = v;
     if (v === selected) o.selected = true;
-    el.appendChild(o);
+    node.appendChild(o);
   });
 }
 
@@ -307,7 +280,7 @@ function overlaps(aFrom, aTo, bFrom, bTo) {
 
 function daysAgo(n) {
   const d = new Date();
-  d.setHours(0,0,0,0);
+  d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() - n);
   return d;
 }
@@ -344,39 +317,34 @@ function filterRows(rows, f) {
   }).sort((a, b) => a.sort - b.sort);
 }
 
-/** Group filtered flat rows into {grand?, groups:[{total, months[]}]} */
+/** Flat rows → expandable groups. Grand is a group too (months under «Все источники»). */
 function groupRows(rows) {
-  const grand = rows.find(r => r.row_kind === 'grand') || null;
   const groups = [];
   let cur = null;
   rows.forEach(r => {
-    if (r.row_kind === 'grand') return;
-    if (r.row_kind === 'total') {
-      cur = { total: r, months: [] };
+    if (r.row_kind === 'grand' || r.row_kind === 'total') {
+      cur = { head: r, months: [] };
       groups.push(cur);
       if (!expanded.has(r.channel_key)) expanded.set(r.channel_key, false);
-    } else if (r.row_kind === 'month') {
-      if (!cur || cur.total.channel_key !== r.channel_key) {
-        // month without total (date filter) — synthetic header
-        cur = {
-          total: {
-            ...r,
-            row_kind: 'total',
-            label: r.channel_key === '(все)' ? 'Все источники' : r.channel_key,
-            spend: null, impressions: null, clicks: null, visits: null, users: null,
-            ctr: null, cpc: null, cpu: null, cr_form: null, form: null, phone: null,
-            plan: null, bot: null, sub: null, cpa: null, bounce: null, depth: null, time: null,
-            _synthetic: true,
-          },
-          months: [],
-        };
-        groups.push(cur);
-        if (!expanded.has(r.channel_key)) expanded.set(r.channel_key, true);
-      }
-      cur.months.push(r);
+      return;
     }
+    if (r.row_kind !== 'month') return;
+    if (!cur || cur.head.channel_key !== r.channel_key) {
+      cur = {
+        head: {
+          ...r,
+          row_kind: 'total',
+          label: r.channel_key === '(все)' ? 'Все источники (high-education)' : r.channel_key,
+          _synthetic: true,
+        },
+        months: [],
+      };
+      groups.push(cur);
+      if (!expanded.has(r.channel_key)) expanded.set(r.channel_key, true);
+    }
+    cur.months.push(r);
   });
-  return { grand, groups };
+  return groups;
 }
 
 function cell(v, kind, band) {
@@ -384,39 +352,26 @@ function cell(v, kind, band) {
   td.className = 'num td-' + band;
   if (v == null || v === '') {
     td.classList.add('empty');
-    td.textContent = '—';
+    td.textContent = '';
     return td;
   }
   td.textContent = fmt[kind](v);
-  td.title = String(v);
   return td;
 }
 
-function appendMetricCells(tr, row) {
+function appendMetrics(tr, row) {
   COLS.forEach(c => {
     const v = row._synthetic ? null : row[c.key];
     tr.appendChild(cell(v, c.kind, c.band));
   });
 }
 
-function renderMetricHead() {
-  const tr = document.getElementById('metricHead');
-  tr.innerHTML = '';
-  COLS.forEach(c => {
-    const th = document.createElement('th');
-    th.className = c.band === 'traffic' ? 'th-traffic' : 'th-micro';
-    th.textContent = c.short;
-    th.title = c.full;
-    tr.appendChild(th);
-  });
-}
-
 function setExpanded(channelKey, value) {
   expanded.set(channelKey, value);
-  document.querySelectorAll('tr.month[data-channel="' + CSS.escape(channelKey) + '"]').forEach(tr => {
+  document.querySelectorAll('tr.month[data-channel="' + channelKey.replace(/"/g, '\\"') + '"]').forEach(tr => {
     tr.classList.toggle('hidden', !value);
   });
-  const btn = document.querySelector('button.toggle[data-channel="' + CSS.escape(channelKey) + '"]');
+  const btn = document.querySelector('button.toggle[data-channel="' + channelKey.replace(/"/g, '\\"') + '"]');
   if (btn) {
     btn.setAttribute('aria-expanded', value ? 'true' : 'false');
     btn.textContent = value ? '−' : '+';
@@ -425,17 +380,17 @@ function setExpanded(channelKey, value) {
 
 function render() {
   const f = {
-    dateFrom: dateFrom.value,
-    dateTo: dateTo.value,
-    scale: scale.value,
-    utmSource: utmSource.value,
-    utmMedium: utmMedium.value,
-    utmCampaign: utmCampaign.value,
-    utmContent: utmContent.value,
-    entry: entry.value,
-    channel: channel.value,
-    campaignType: campaignType.value,
-    weeks: weeks.value,
+    dateFrom: el.dateFrom.value,
+    dateTo: el.dateTo.value,
+    scale: el.scale.value,
+    utmSource: el.utmSource.value,
+    utmMedium: el.utmMedium.value,
+    utmCampaign: el.utmCampaign.value,
+    utmContent: el.utmContent.value,
+    entry: el.entry.value,
+    channel: el.channel.value,
+    campaignType: el.campaignType.value,
+    weeks: el.weeks.value,
   };
 
   const hints = [];
@@ -444,42 +399,32 @@ function render() {
     hints.push('UTM пока не режет витрину.');
   }
   if (f.entry !== '(все)') hints.push('Точка входа ещё не пришита к Метрике.');
-  hint.textContent = hints.join(' ');
-  hint.style.display = hints.length ? 'block' : 'none';
+  el.hint.textContent = hints.join(' ');
+  el.hint.style.display = hints.length ? 'block' : 'none';
 
-  const filtered = filterRows(DATA.rows, f);
-  const { grand, groups } = groupRows(filtered);
-  tbody.innerHTML = '';
+  const groups = groupRows(filterRows(DATA.rows, f));
+  el.tbody.innerHTML = '';
 
-  if (!grand && !groups.length) {
+  if (!groups.length) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
     td.colSpan = COLS.length + 1;
     td.textContent = 'Нет строк под выбранные фильтры';
-    td.style.padding = '16px';
+    td.style.padding = '12px';
     tr.appendChild(td);
-    tbody.appendChild(tr);
-    status.textContent = '0 строк';
+    el.tbody.appendChild(tr);
+    el.status.textContent = '0 строк';
     return;
   }
 
-  if (grand) {
-    const tr = document.createElement('tr');
-    tr.className = 'grand';
-    const label = document.createElement('td');
-    label.className = 'col-label';
-    label.textContent = grand.label;
-    tr.appendChild(label);
-    appendMetricCells(tr, grand);
-    tbody.appendChild(tr);
-  }
-
   groups.forEach(g => {
-    const key = g.total.channel_key;
+    const key = g.head.channel_key;
     const isOpen = expanded.get(key) === true;
+    const isGrand = g.head.row_kind === 'grand';
 
     const tr = document.createElement('tr');
-    tr.className = 'channel';
+    tr.className = isGrand ? 'grand' : 'channel';
+
     const label = document.createElement('td');
     label.className = 'col-label';
 
@@ -489,26 +434,25 @@ function render() {
       btn.className = 'toggle';
       btn.dataset.channel = key;
       btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      btn.setAttribute('aria-label', (isOpen ? 'Свернуть ' : 'Раскрыть ') + g.total.label);
       btn.textContent = isOpen ? '−' : '+';
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
+      btn.addEventListener('click', ev => {
+        ev.stopPropagation();
         setExpanded(key, !(expanded.get(key) === true));
       });
       label.appendChild(btn);
     }
 
     const name = document.createElement('span');
-    name.className = 'channel-name';
-    name.textContent = g.total.label;
-    name.title = g.total.label;
+    name.textContent = g.head.label;
     label.appendChild(name);
     tr.appendChild(label);
-    appendMetricCells(tr, g.total);
-    tr.addEventListener('click', () => {
-      if (g.months.length) setExpanded(key, !(expanded.get(key) === true));
-    });
-    tbody.appendChild(tr);
+    appendMetrics(tr, g.head);
+
+    if (g.months.length) {
+      tr.style.cursor = 'pointer';
+      tr.addEventListener('click', () => setExpanded(key, !(expanded.get(key) === true)));
+    }
+    el.tbody.appendChild(tr);
 
     g.months.forEach(m => {
       const mtr = document.createElement('tr');
@@ -518,63 +462,65 @@ function render() {
       ml.className = 'col-label';
       ml.textContent = m.label;
       mtr.appendChild(ml);
-      appendMetricCells(mtr, m);
-      tbody.appendChild(mtr);
+      appendMetrics(mtr, m);
+      el.tbody.appendChild(mtr);
     });
   });
 
   const openCount = [...expanded.values()].filter(Boolean).length;
-  status.textContent = groups.length + ' каналов · раскрыто ' + openCount
-    + ' · обновлено ' + (DATA.meta.updated_at || '—')
-    + ' · наведи на заголовок колонки — полное имя';
+  el.status.textContent = groups.length + ' групп · раскрыто ' + openCount
+    + ' · обновлено ' + (DATA.meta.updated_at || '—');
 }
 
 function expandAll(open) {
-  document.querySelectorAll('button.toggle').forEach(btn => {
-    setExpanded(btn.dataset.channel, open);
+  DATA.rows.forEach(r => {
+    if (r.row_kind === 'total' || r.row_kind === 'grand') expanded.set(r.channel_key, open);
   });
-  // also mark keys without visible toggle
-  expanded.forEach((_, key) => expanded.set(key, open));
   render();
 }
 
 async function boot() {
-  renderMetricHead();
   const res = await fetch('data.json?_=' + Date.now());
+  if (!res.ok) throw new Error('HTTP ' + res.status);
   DATA = await res.json();
-  title.textContent = DATA.meta.title;
-  meta.textContent = [
+
+  el.title.textContent = DATA.meta.title;
+  el.meta.textContent = [
     'Счётчик ' + DATA.meta.counter,
     DATA.meta.period.from + ' — ' + DATA.meta.period.to,
     DATA.meta.filter_note,
   ].join(' · ');
-
-  banner.textContent = (DATA.meta.pending && DATA.meta.pending.length)
+  el.banner.textContent = (DATA.meta.pending && DATA.meta.pending.length)
     ? ('В работе: ' + DATA.meta.pending.join('; '))
     : '';
-  banner.style.display = banner.textContent ? 'block' : 'none';
+  el.banner.style.display = el.banner.textContent ? 'block' : 'none';
 
   const d = DATA.dictionaries;
-  dateFrom.value = DATA.meta.period.from;
-  dateTo.value = DATA.meta.period.to;
-  fillSelect(scale, d.scales, 'Месяц');
-  fillSelect(utmSource, d.utm_source, '(все)');
-  fillSelect(utmMedium, d.utm_medium, '(все)');
-  fillSelect(utmCampaign, d.utm_campaign, '(все)');
-  fillSelect(utmContent, d.utm_content, '(все)');
-  fillSelect(entry, d.entry_points, '(все)');
-  fillSelect(channel, d.channels, '(все)');
-  fillSelect(campaignType, d.campaign_types, '(все)');
+  el.dateFrom.value = DATA.meta.period.from;
+  el.dateTo.value = DATA.meta.period.to;
+  fillSelect(el.scale, d.scales, 'Месяц');
+  fillSelect(el.utmSource, d.utm_source, '(все)');
+  fillSelect(el.utmMedium, d.utm_medium, '(все)');
+  fillSelect(el.utmCampaign, d.utm_campaign, '(все)');
+  fillSelect(el.utmContent, d.utm_content, '(все)');
+  fillSelect(el.entry, d.entry_points, '(все)');
+  fillSelect(el.channel, d.channels, '(все)');
+  fillSelect(el.campaignType, d.campaign_types, '(все)');
 
-  ['dateFrom','dateTo','scale','utmSource','utmMedium','utmCampaign','utmContent','entry','channel','campaignType','weeks']
-    .forEach(id => document.getElementById(id).addEventListener('input', render));
-  expandAllBtn.addEventListener('click', () => expandAll(true));
-  collapseAllBtn.addEventListener('click', () => expandAll(false));
+  [
+    el.dateFrom, el.dateTo, el.scale, el.utmSource, el.utmMedium, el.utmCampaign,
+    el.utmContent, el.entry, el.channel, el.campaignType, el.weeks,
+  ].forEach(node => node.addEventListener('input', render));
+
+  el.expandAll.addEventListener('click', () => expandAll(true));
+  el.collapseAll.addEventListener('click', () => expandAll(false));
+
   render();
 }
 
 boot().catch(err => {
-  status.textContent = 'Не удалось загрузить data.json: ' + err.message;
+  el.status.textContent = 'Не удалось загрузить data.json: ' + err.message;
+  console.error(err);
 });
 </script>
 </body>
