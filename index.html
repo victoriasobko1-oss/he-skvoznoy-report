@@ -39,7 +39,7 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   align-items: end;
 }
 .toolbar .group { display: grid; gap: 2px; min-width: 0; }
-.toolbar label { font-size: 10px; font-weight: 700; color: #555; }
+.toolbar label { font-size: 20px; font-weight: 700; color: #555; }
 .toolbar input, .toolbar select {
   width: 100%; height: 28px; padding: 0 6px; border: 1px solid #999; background: var(--filter);
   font: 12px var(--font); border-radius: 2px; min-width: 0;
@@ -246,11 +246,11 @@ const COLS = [
   { key: 'spend', kind: 'money', band: 'traffic', cf: 'none' },
   { key: 'impressions', kind: 'int', band: 'traffic', cf: 'none' },
   { key: 'clicks', kind: 'int', band: 'traffic', cf: 'none' },
-  { key: 'visits', kind: 'int', band: 'traffic', cf: 'higher' },
-  { key: 'users', kind: 'int', band: 'traffic', cf: 'higher' },
-  { key: 'ctr', kind: 'pct', band: 'traffic', cf: 'higher' },
-  { key: 'cpc', kind: 'money', band: 'traffic', cf: 'lower' },
-  { key: 'cpu', kind: 'money', band: 'traffic', cf: 'lower' },
+  { key: 'visits', kind: 'int', band: 'traffic', cf: 'none' },
+  { key: 'users', kind: 'int', band: 'traffic', cf: 'none' },
+  { key: 'ctr', kind: 'pct', band: 'traffic', cf: 'none' },
+  { key: 'cpc', kind: 'money', band: 'traffic', cf: 'none' },
+  { key: 'cpu', kind: 'money', band: 'traffic', cf: 'none' },
   { key: 'cr_form', kind: 'pct', band: 'micro', cf: 'higher' },
   { key: 'form', kind: 'int', band: 'micro', cf: 'higher' },
   { key: 'phone', kind: 'int', band: 'micro', cf: 'higher' },
