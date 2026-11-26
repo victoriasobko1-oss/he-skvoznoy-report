@@ -361,12 +361,71 @@ function filterRows(rows, f) {
   }).sort((a, b) => a.sort - b.sort);
 }
 
+const SUM_KEYS = ['spend', 'impressions', 'clicks', 'visits', 'users', 'form', 'phone', 'plan', 'bot', 'sub'];
+
+function channelLabel(channelKey) {
+  const hit = DATA.rows.find(r =>
+    (r.row_kind === 'total' || r.row_kind === 'grand') && r.channel_key === channelKey
+  );
+  if (hit) return hit.label;
+  return channelKey === '(все)' ? 'Все источники (high-education)' : channelKey;
+}
+
+/** Sum volumes + recompute rates from visible month rows (for filtered date ranges). */
+function aggregateMetrics(months) {
+  const out = {};
+  SUM_KEYS.forEach(k => {
+    let s = 0;
+    let any = false;
+    months.forEach(m => {
+      if (m[k] != null && m[k] !== '') {
+        s += Number(m[k]);
+        any = true;
+      }
+    });
+    out[k] = any ? s : null;
+  });
+
+  let w = 0;
+  let bounceAcc = 0;
+  let depthAcc = 0;
+  let timeAcc = 0;
+  let crAcc = 0;
+  let crW = 0;
+  months.forEach(m => {
+    const vw = Number(m.visits) || 0;
+    if (m.bounce != null && vw) { bounceAcc += Number(m.bounce) * vw; w += vw; }
+    if (m.depth != null && vw) depthAcc += Number(m.depth) * vw;
+    if (m.time != null && vw) timeAcc += Number(m.time) * vw;
+    if (m.cr_form != null && vw) { crAcc += Number(m.cr_form) * vw; crW += vw; }
+  });
+  out.bounce = w ? bounceAcc / w : null;
+  out.depth = w ? depthAcc / w : null;
+  out.time = w ? timeAcc / w : null;
+
+  if (out.impressions && out.clicks != null) out.ctr = out.clicks / out.impressions;
+  else out.ctr = null;
+
+  if (out.form != null && out.visits) out.cr_form = out.form / out.visits;
+  else if (crW) out.cr_form = crAcc / crW;
+  else out.cr_form = null;
+
+  if (out.spend != null && out.clicks) out.cpc = out.spend / out.clicks;
+  else out.cpc = null;
+  if (out.spend != null && out.users) out.cpu = out.spend / out.users;
+  else out.cpu = null;
+  if (out.spend != null && out.form) out.cpa = out.spend / out.form;
+  else out.cpa = null;
+
+  return out;
+}
+
 function groupRows(rows) {
   const groups = [];
   let cur = null;
   rows.forEach(r => {
     if (r.row_kind === 'grand' || r.row_kind === 'total') {
-      cur = { head: r, months: [] };
+      cur = { head: { ...r }, months: [] };
       groups.push(cur);
       if (!expanded.has(r.channel_key)) expanded.set(r.channel_key, false);
       return;
@@ -375,17 +434,25 @@ function groupRows(rows) {
     if (!cur || cur.head.channel_key !== r.channel_key) {
       cur = {
         head: {
-          ...r,
-          row_kind: 'total',
-          label: r.channel_key === '(все)' ? 'Все источники (high-education)' : r.channel_key,
-          _synthetic: true,
+          channel_key: r.channel_key,
+          campaign_type: r.campaign_type,
+          row_kind: r.channel_key === '(все)' ? 'grand' : 'total',
+          label: channelLabel(r.channel_key),
+          sort: r.sort,
         },
         months: [],
       };
       groups.push(cur);
-      if (!expanded.has(r.channel_key)) expanded.set(r.channel_key, true);
+      if (!expanded.has(r.channel_key)) expanded.set(r.channel_key, false);
     }
     cur.months.push(r);
+  });
+
+  // Always roll up visible months into channel/grand headers so collapsed view stays filled
+  // when the date range is narrower than the snapshot totals.
+  groups.forEach(g => {
+    if (!g.months.length) return;
+    Object.assign(g.head, aggregateMetrics(g.months));
   });
   return groups;
 }
@@ -397,7 +464,7 @@ function buildCfScales(groups) {
     if (c.cf === 'none') return;
     const vals = [];
     groups.forEach(g => {
-      if (!g.head._synthetic && g.head.row_kind !== 'grand' && g.head[c.key] != null) {
+      if (g.head.row_kind !== 'grand' && g.head[c.key] != null) {
         vals.push(Number(g.head[c.key]));
       }
       g.months.forEach(m => {
@@ -455,8 +522,7 @@ function cell(v, col, scales, applyCf) {
 
 function appendMetrics(tr, row, scales, applyCf) {
   COLS.forEach(c => {
-    const v = row._synthetic ? null : row[c.key];
-    tr.appendChild(cell(v, c, scales, applyCf));
+    tr.appendChild(cell(row[c.key], c, scales, applyCf));
   });
 }
 
