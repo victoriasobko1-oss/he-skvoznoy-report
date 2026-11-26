@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Сквозная отчетность | Магистратура</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css"/>
 <style>
 :root {
   --bg: #eceff3;
@@ -18,6 +19,10 @@
   --filter: #fff2cc;
   --accent: #1a73e8;
   --font: Arial, Helvetica, sans-serif;
+  --h-metric: 14.3px;   /* was ~11px, +30% */
+  --h-group: 33px;      /* was ~11px, +200% */
+  --col-min: 70px;      /* was 88, -20% */
+  --col-max: 88px;      /* was 110, -20% */
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 12px/1.3 var(--font); }
@@ -27,18 +32,22 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 .top h1 { margin: 0; font-size: 16px; font-weight: 700; }
 .meta { margin: 4px 0 8px; color: var(--muted); font-size: 11px; line-height: 1.35; }
 
-.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
-.toolbar .group { display: grid; gap: 2px; }
+.toolbar {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px 10px;
+  align-items: end;
+}
+.toolbar .group { display: grid; gap: 2px; min-width: 0; }
 .toolbar label { font-size: 10px; font-weight: 700; color: #555; }
 .toolbar input, .toolbar select {
-  height: 28px; padding: 0 6px; border: 1px solid #999; background: var(--filter);
+  width: 100%; height: 28px; padding: 0 6px; border: 1px solid #999; background: var(--filter);
   font: 12px var(--font); border-radius: 2px; min-width: 0;
 }
-.toolbar .dates { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; width: 210px; }
-.toolbar .w-sm { width: 108px; }
-.toolbar .w-md { width: 130px; }
-.toolbar .w-weeks { width: 80px; }
-.actions { display: flex; gap: 6px; margin-left: auto; }
+.toolbar .actions {
+  grid-column: 1 / -1;
+  display: flex; gap: 6px; justify-content: flex-end;
+}
 .btn {
   height: 28px; padding: 0 10px; border: 1px solid #999; background: #fff;
   font: 12px var(--font); cursor: pointer; border-radius: 2px;
@@ -59,7 +68,7 @@ table.sheet {
 }
 table.sheet th, table.sheet td {
   border: 1px solid var(--line);
-  padding: 3px 6px;
+  padding: 3px 5px;
   vertical-align: middle;
   white-space: nowrap;
   height: 22px;
@@ -68,35 +77,59 @@ thead th {
   position: sticky; z-index: 5; font-weight: 700; text-align: center;
   box-shadow: inset 0 -1px 0 var(--line);
 }
-thead tr.group th { top: 0; }
-thead tr.metrics th { top: 24px; white-space: normal; line-height: 1.2; max-width: 110px; min-width: 88px; }
-thead tr.source th { top: 58px; font-weight: 400; font-size: 9px; color: #555; max-width: 110px; white-space: normal; line-height: 1.15; }
+thead tr.group th.th-traffic,
+thead tr.group th.th-micro {
+  top: 0;
+  font-size: var(--h-group);
+  line-height: 1.05;
+  padding: 8px 6px;
+  letter-spacing: 0.02em;
+}
+thead tr.metrics th {
+  top: 50px;
+  font-size: var(--h-metric);
+  white-space: normal;
+  line-height: 1.15;
+  max-width: var(--col-max);
+  min-width: var(--col-min);
+  padding: 4px 4px;
+}
+thead tr.source th {
+  top: 96px;
+  font-weight: 400;
+  font-size: 9px;
+  color: #555;
+  max-width: var(--col-max);
+  min-width: var(--col-min);
+  white-space: normal;
+  line-height: 1.15;
+}
 
-.th-traffic, .td-traffic { background: var(--traffic) !important; }
-.th-micro, .td-micro { background: var(--micro) !important; }
+.th-traffic { background: var(--traffic) !important; }
+.th-micro { background: var(--micro) !important; }
 .th-src { background: #f7f7f7 !important; }
 
 .col-label {
   position: sticky; left: 0; z-index: 4;
-  min-width: 260px; max-width: 320px; width: 280px;
+  min-width: 220px; max-width: 260px; width: 240px;
   text-align: left !important; background: #fff;
   white-space: normal; line-height: 1.2;
 }
-thead th.col-label { z-index: 6; background: #f2f2f2; top: 0; height: auto; }
-/* label spans 3 header rows */
-thead tr.group th.col-label { vertical-align: middle; }
+thead th.col-label { z-index: 6; background: #f2f2f2; top: 0; font-size: var(--h-metric); }
+thead tr.group th.col-label { vertical-align: middle; font-size: 14px; }
 
 .num { text-align: right; font-variant-numeric: tabular-nums; }
-.empty { color: #bbb; text-align: right; }
+.empty { color: #bbb; text-align: right; background: #fafafa !important; }
 
-tr.grand td { background: var(--grand) !important; font-weight: 700; }
-tr.grand td.col-label { background: var(--grand) !important; }
-tr.channel td { background: var(--channel); }
+/* band tints only when no CF */
+td.td-traffic:not(.cf) { background: var(--traffic); }
+td.td-micro:not(.cf) { background: var(--micro); }
+
+tr.grand td.col-label { background: var(--grand) !important; font-weight: 700; }
+tr.grand td.num:not(.cf) { background: var(--grand) !important; font-weight: 700; }
 tr.channel td.col-label { background: var(--channel); font-weight: 700; }
-tr.channel td.td-traffic { background: #f8d9a8 !important; }
-tr.channel td.td-micro { background: #c9d8f7 !important; }
-tr.month td.col-label { padding-left: 34px; font-weight: 400; }
-tr.month:hover td { filter: brightness(0.98); }
+tr.month td.col-label { padding-left: 34px; font-weight: 400; background: #fff; }
+tr.month:hover td.col-label { background: #f5f8ff; }
 tr.hidden { display: none; }
 
 .toggle {
@@ -111,6 +144,9 @@ tr.hidden { display: none; }
   flex: 0 0 auto; padding: 5px 12px; font-size: 11px; color: var(--muted);
   background: #f3f3f3; border-top: 1px solid #ccc;
 }
+
+/* flatpickr yellow like selectors */
+.flatpickr-input[readonly] { cursor: pointer; background: var(--filter); }
 </style>
 </head>
 <body>
@@ -118,28 +154,31 @@ tr.hidden { display: none; }
   <div class="top">
     <h1 id="title">Прототип сквозной отчетности | Магистратура</h1>
     <div class="meta" id="meta"></div>
+
     <div class="toolbar">
+      <!-- row 1: 5 -->
       <div class="group">
-        <label>Диапазон дат (от / до)</label>
-        <div class="dates">
-          <input type="date" id="dateFrom"/>
-          <input type="date" id="dateTo"/>
-        </div>
+        <label>Диапазон дат</label>
+        <input type="text" id="dateRange" placeholder="От — до" readonly/>
+        <input type="hidden" id="dateFrom"/>
+        <input type="hidden" id="dateTo"/>
       </div>
-      <div class="group"><label>Масштаб дат</label><select id="scale" class="w-sm"></select></div>
-      <div class="group"><label>UTM Source</label><select id="utmSource" class="w-sm"></select></div>
-      <div class="group"><label>UTM Medium</label><select id="utmMedium" class="w-sm"></select></div>
-      <div class="group"><label>UTM Campaign</label><select id="utmCampaign" class="w-md"></select></div>
-      <div class="group"><label>UTM Content</label><select id="utmContent" class="w-sm"></select></div>
-      <div class="group"><label>Точка входа</label><select id="entry" class="w-sm"></select></div>
-      <div class="group"><label>Канал (макро)</label><select id="channel" class="w-md"></select></div>
-      <div class="group"><label>Тип кампаний</label><select id="campaignType" class="w-md"></select></div>
-      <div class="group"><label>Количество недель</label><input type="number" id="weeks" class="w-weeks" min="1" max="52" placeholder="выкл"/></div>
+      <div class="group"><label>Масштаб дат</label><select id="scale"></select></div>
+      <div class="group"><label>UTM Source</label><select id="utmSource"></select></div>
+      <div class="group"><label>UTM Medium</label><select id="utmMedium"></select></div>
+      <div class="group"><label>UTM Campaign</label><select id="utmCampaign"></select></div>
+      <!-- row 2: 5 -->
+      <div class="group"><label>UTM Content</label><select id="utmContent"></select></div>
+      <div class="group"><label>Точка входа</label><select id="entry"></select></div>
+      <div class="group"><label>Канал (макро)</label><select id="channel"></select></div>
+      <div class="group"><label>Тип кампаний</label><select id="campaignType"></select></div>
+      <div class="group"><label>Количество недель</label><input type="number" id="weeks" min="1" max="52" placeholder="выкл"/></div>
       <div class="actions">
         <button type="button" class="btn" id="expandAll">Раскрыть все</button>
         <button type="button" class="btn" id="collapseAll">Свернуть все</button>
       </div>
     </div>
+
     <div class="hint" id="hint"></div>
     <div class="banner" id="banner"></div>
   </div>
@@ -199,26 +238,29 @@ tr.hidden { display: none; }
   <div class="status" id="status">Загрузка…</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ru.js"></script>
 <script>
+/** higher = better | lower = better | none = no CF (volume/cost absolute) */
 const COLS = [
-  { key: 'spend', kind: 'money', band: 'traffic' },
-  { key: 'impressions', kind: 'int', band: 'traffic' },
-  { key: 'clicks', kind: 'int', band: 'traffic' },
-  { key: 'visits', kind: 'int', band: 'traffic' },
-  { key: 'users', kind: 'int', band: 'traffic' },
-  { key: 'ctr', kind: 'pct', band: 'traffic' },
-  { key: 'cpc', kind: 'money', band: 'traffic' },
-  { key: 'cpu', kind: 'money', band: 'traffic' },
-  { key: 'cr_form', kind: 'pct', band: 'micro' },
-  { key: 'form', kind: 'int', band: 'micro' },
-  { key: 'phone', kind: 'int', band: 'micro' },
-  { key: 'plan', kind: 'int', band: 'micro' },
-  { key: 'bot', kind: 'int', band: 'micro' },
-  { key: 'sub', kind: 'int', band: 'micro' },
-  { key: 'cpa', kind: 'money', band: 'micro' },
-  { key: 'bounce', kind: 'pct', band: 'micro' },
-  { key: 'depth', kind: 'float', band: 'micro' },
-  { key: 'time', kind: 'float', band: 'micro' },
+  { key: 'spend', kind: 'money', band: 'traffic', cf: 'none' },
+  { key: 'impressions', kind: 'int', band: 'traffic', cf: 'none' },
+  { key: 'clicks', kind: 'int', band: 'traffic', cf: 'none' },
+  { key: 'visits', kind: 'int', band: 'traffic', cf: 'higher' },
+  { key: 'users', kind: 'int', band: 'traffic', cf: 'higher' },
+  { key: 'ctr', kind: 'pct', band: 'traffic', cf: 'higher' },
+  { key: 'cpc', kind: 'money', band: 'traffic', cf: 'lower' },
+  { key: 'cpu', kind: 'money', band: 'traffic', cf: 'lower' },
+  { key: 'cr_form', kind: 'pct', band: 'micro', cf: 'higher' },
+  { key: 'form', kind: 'int', band: 'micro', cf: 'higher' },
+  { key: 'phone', kind: 'int', band: 'micro', cf: 'higher' },
+  { key: 'plan', kind: 'int', band: 'micro', cf: 'higher' },
+  { key: 'bot', kind: 'int', band: 'micro', cf: 'higher' },
+  { key: 'sub', kind: 'int', band: 'micro', cf: 'higher' },
+  { key: 'cpa', kind: 'money', band: 'micro', cf: 'lower' },
+  { key: 'bounce', kind: 'pct', band: 'micro', cf: 'lower' },
+  { key: 'depth', kind: 'float', band: 'micro', cf: 'higher' },
+  { key: 'time', kind: 'float', band: 'micro', cf: 'higher' },
 ];
 
 const fmt = {
@@ -233,6 +275,7 @@ const fmt = {
 };
 
 let DATA = null;
+let datePicker = null;
 const expanded = new Map();
 
 const el = {
@@ -242,6 +285,7 @@ const el = {
   banner: document.getElementById('banner'),
   status: document.getElementById('status'),
   tbody: document.getElementById('tbody'),
+  dateRange: document.getElementById('dateRange'),
   dateFrom: document.getElementById('dateFrom'),
   dateTo: document.getElementById('dateTo'),
   scale: document.getElementById('scale'),
@@ -317,7 +361,6 @@ function filterRows(rows, f) {
   }).sort((a, b) => a.sort - b.sort);
 }
 
-/** Flat rows → expandable groups. Grand is a group too (months under «Все источники»). */
 function groupRows(rows) {
   const groups = [];
   let cur = null;
@@ -347,31 +390,83 @@ function groupRows(rows) {
   return groups;
 }
 
-function cell(v, kind, band) {
+/** Collect values for CF among comparable rows (channel totals + months, skip grand/synthetic). */
+function buildCfScales(groups) {
+  const scales = {};
+  COLS.forEach(c => {
+    if (c.cf === 'none') return;
+    const vals = [];
+    groups.forEach(g => {
+      if (!g.head._synthetic && g.head.row_kind !== 'grand' && g.head[c.key] != null) {
+        vals.push(Number(g.head[c.key]));
+      }
+      g.months.forEach(m => {
+        if (m[c.key] != null) vals.push(Number(m[c.key]));
+      });
+    });
+    if (!vals.length) return;
+    scales[c.key] = { min: Math.min(...vals), max: Math.max(...vals), dir: c.cf };
+  });
+  return scales;
+}
+
+/** t=0 worst → red, t=1 best → green */
+function heatColor(t) {
+  const x = Math.max(0, Math.min(1, t));
+  // red #e67c73 → yellow #f6e27a → green #57bb8a
+  const stops = [
+    { t: 0, r: 230, g: 124, b: 115 },
+    { t: 0.5, r: 246, g: 226, b: 122 },
+    { t: 1, r: 87, g: 187, b: 138 },
+  ];
+  let a = stops[0], b = stops[1];
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (x >= stops[i].t && x <= stops[i + 1].t) { a = stops[i]; b = stops[i + 1]; break; }
+  }
+  const u = (x - a.t) / (b.t - a.t || 1);
+  const r = Math.round(a.r + (b.r - a.r) * u);
+  const g = Math.round(a.g + (b.g - a.g) * u);
+  const bl = Math.round(a.b + (b.b - a.b) * u);
+  return 'rgb(' + r + ',' + g + ',' + bl + ')';
+}
+
+function cfScore(value, scale) {
+  if (!scale || scale.max === scale.min) return 0.5;
+  let t = (value - scale.min) / (scale.max - scale.min);
+  if (scale.dir === 'lower') t = 1 - t;
+  return t;
+}
+
+function cell(v, col, scales, applyCf) {
   const td = document.createElement('td');
-  td.className = 'num td-' + band;
+  td.className = 'num td-' + col.band;
   if (v == null || v === '') {
     td.classList.add('empty');
     td.textContent = '';
     return td;
   }
-  td.textContent = fmt[kind](v);
+  td.textContent = fmt[col.kind](v);
+  if (applyCf && col.cf !== 'none' && scales[col.key]) {
+    td.classList.add('cf');
+    td.style.background = heatColor(cfScore(Number(v), scales[col.key]));
+  }
   return td;
 }
 
-function appendMetrics(tr, row) {
+function appendMetrics(tr, row, scales, applyCf) {
   COLS.forEach(c => {
     const v = row._synthetic ? null : row[c.key];
-    tr.appendChild(cell(v, c.kind, c.band));
+    tr.appendChild(cell(v, c, scales, applyCf));
   });
 }
 
 function setExpanded(channelKey, value) {
   expanded.set(channelKey, value);
-  document.querySelectorAll('tr.month[data-channel="' + channelKey.replace(/"/g, '\\"') + '"]').forEach(tr => {
+  const safe = channelKey.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  document.querySelectorAll('tr.month[data-channel="' + safe + '"]').forEach(tr => {
     tr.classList.toggle('hidden', !value);
   });
-  const btn = document.querySelector('button.toggle[data-channel="' + channelKey.replace(/"/g, '\\"') + '"]');
+  const btn = document.querySelector('button.toggle[data-channel="' + safe + '"]');
   if (btn) {
     btn.setAttribute('aria-expanded', value ? 'true' : 'false');
     btn.textContent = value ? '−' : '+';
@@ -403,6 +498,7 @@ function render() {
   el.hint.style.display = hints.length ? 'block' : 'none';
 
   const groups = groupRows(filterRows(DATA.rows, f));
+  const scales = buildCfScales(groups);
   el.tbody.innerHTML = '';
 
   if (!groups.length) {
@@ -446,7 +542,7 @@ function render() {
     name.textContent = g.head.label;
     label.appendChild(name);
     tr.appendChild(label);
-    appendMetrics(tr, g.head);
+    appendMetrics(tr, g.head, scales, !isGrand);
 
     if (g.months.length) {
       tr.style.cursor = 'pointer';
@@ -462,13 +558,14 @@ function render() {
       ml.className = 'col-label';
       ml.textContent = m.label;
       mtr.appendChild(ml);
-      appendMetrics(mtr, m);
+      appendMetrics(mtr, m, scales, true);
       el.tbody.appendChild(mtr);
     });
   });
 
   const openCount = [...expanded.values()].filter(Boolean).length;
   el.status.textContent = groups.length + ' групп · раскрыто ' + openCount
+    + ' · CF: зелёный = лучше, красный = хуже (относительно видимых строк)'
     + ' · обновлено ' + (DATA.meta.updated_at || '—');
 }
 
@@ -477,6 +574,34 @@ function expandAll(open) {
     if (r.row_kind === 'total' || r.row_kind === 'grand') expanded.set(r.channel_key, open);
   });
   render();
+}
+
+function initDateRange(from, to) {
+  el.dateFrom.value = from;
+  el.dateTo.value = to;
+  if (datePicker) datePicker.destroy();
+  datePicker = flatpickr(el.dateRange, {
+    mode: 'range',
+    dateFormat: 'Y-m-d',
+    locale: 'ru',
+    defaultDate: [from, to],
+    allowInput: false,
+    onClose: function(selectedDates) {
+      if (selectedDates.length === 1) {
+        // keep open until range complete — flatpickr handles; if only one, use same day
+        const d = flatpickr.formatDate(selectedDates[0], 'Y-m-d');
+        el.dateFrom.value = d;
+        el.dateTo.value = d;
+        render();
+        return;
+      }
+      if (selectedDates.length >= 2) {
+        el.dateFrom.value = flatpickr.formatDate(selectedDates[0], 'Y-m-d');
+        el.dateTo.value = flatpickr.formatDate(selectedDates[1], 'Y-m-d');
+        render();
+      }
+    },
+  });
 }
 
 async function boot() {
@@ -496,8 +621,7 @@ async function boot() {
   el.banner.style.display = el.banner.textContent ? 'block' : 'none';
 
   const d = DATA.dictionaries;
-  el.dateFrom.value = DATA.meta.period.from;
-  el.dateTo.value = DATA.meta.period.to;
+  initDateRange(DATA.meta.period.from, DATA.meta.period.to);
   fillSelect(el.scale, d.scales, 'Месяц');
   fillSelect(el.utmSource, d.utm_source, '(все)');
   fillSelect(el.utmMedium, d.utm_medium, '(все)');
@@ -507,10 +631,8 @@ async function boot() {
   fillSelect(el.channel, d.channels, '(все)');
   fillSelect(el.campaignType, d.campaign_types, '(все)');
 
-  [
-    el.dateFrom, el.dateTo, el.scale, el.utmSource, el.utmMedium, el.utmCampaign,
-    el.utmContent, el.entry, el.channel, el.campaignType, el.weeks,
-  ].forEach(node => node.addEventListener('input', render));
+  [el.scale, el.utmSource, el.utmMedium, el.utmCampaign, el.utmContent, el.entry, el.channel, el.campaignType, el.weeks]
+    .forEach(node => node.addEventListener('input', render));
 
   el.expandAll.addEventListener('click', () => expandAll(true));
   el.collapseAll.addEventListener('click', () => expandAll(false));
